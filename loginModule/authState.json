@@ -1,0 +1,237 @@
+{
+  "cookies": [
+    {
+      "name": "ASSOCIATIONANYWHEREAPEXSESSION",
+      "value": "ORA_WWV-UNcW8GXeapwbc_YndrDhWHRO",
+      "domain": "online.bcen.org",
+      "path": "/bcendevssa/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ACGIAPEXSESSIONBACKOFFICE",
+      "value": "ORA_WWV-md-RikEL9Z7ERjXlQG_38b42",
+      "domain": "online.bcen.org",
+      "path": "/bcendev/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "BREADCRUMB_SESSION_ID",
+      "value": "1748756",
+      "domain": "online.bcen.org",
+      "path": "/bcendev",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "quickLookUp",
+      "value": "",
+      "domain": "online.bcen.org",
+      "path": "/bcendev",
+      "expires": 1737629287,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "APP_CONTEXT",
+      "value": "CEN",
+      "domain": "online.bcen.org",
+      "path": "/bcendev",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ALERT_CUST",
+      "value": "105307",
+      "domain": "online.bcen.org",
+      "path": "/bcendev",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "NSC_bdhj-W_pomjof.cdfo.psh_udq443",
+      "value": "7ce2a3d91526b0cd032f5ff0a42e923aa3c5e4dcf7b8b783a73aadb707819c68bd433e10",
+      "domain": "online.bcen.org",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": ".AspNetCore.Session",
+      "value": "CfDJ8KQJ0Yba0v5Do3gWByQ6suCt8I%2F%2BiUrx9vSzGF89rkeNKLyVon5yYxOL5nzypaYvh13zfy%2F1BNaRQy62aLKc6MyR70x9PtAIQ5F88mt40fq2c%2BXArZifOfac55efNhKqnZskybNTARYo1R%2FSzXp%2BXoTLjOl1jk0EwKSNtFBOejrc",
+      "domain": "logindev.bcen.org",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ARRAffinity",
+      "value": "a779f6bbf7308f5b890656e3bbb7d2127c889fe631460ea4047f33796daa90d8",
+      "domain": ".logindev.bcen.org",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ARRAffinitySameSite",
+      "value": "a779f6bbf7308f5b890656e3bbb7d2127c889fe631460ea4047f33796daa90d8",
+      "domain": ".logindev.bcen.org",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "saml-session",
+      "value": "CfDJ8KQJ0Yba0v5Do3gWByQ6suDuZIfyPQprvH2AAg2KbeFkSrI8004D_J6n927mq1xqLmTMIuRgdtOHU_6RTaKPAFiSDIkGevWbH4Pnw04Ysvbd3sp1hC-9TP3qXSGRHDZNUb-XImBras5Qd0hs62pk0Fc0tdF_o8hJTaoHRrbGxh9UV7Kw0je-vmhYTPYxKS7HXEoEUdm6TfiWE1WQ0IJkS2nbnPaOpz5w3WEgB7PwUWDRNngQjcMmcwHgn2umNWwGCNuuX25HiX11Lq9oa54EozsrAYhatgRTK_HQPEZByrATrY1vbCKXvRzPygu48UlhEnijbRutcy5wPFUdFFDQ_-igjEHto0QFaT7vvhjGWDlB",
+      "domain": "logindev.bcen.org",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "idsrv.session",
+      "value": "4D8F0EA70293C6475AA98C910C9CC93C",
+      "domain": "logindev.bcen.org",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "idsrv",
+      "value": "CfDJ8KQJ0Yba0v5Do3gWByQ6suDGH6BZ-R1kufSRNwL4uVR-8LeMNdAIliKQqTTB7rFHRF5pBrZF9DdOD1KxlkFcTFBMjiCNKfRF5XIKI4m4pB9hgj1QmLjg8p2ckHCSOGyKPbMXSnDygMatwDQp9wJCAUkCuqecOGm2rIJoOm1tRAH8adVyg5NgUY2vtcUen3mqGfMj5Rp5rXFJoSPREeF2NiCBwFLRRCObRLRjfdsoM08YlNppwgY4fBUvUft6ptsxSA1XzLiWtYhVE-L-feApAeRy4AvTxCjZW4e3joB_q_eG76TVfrZfVhe5tr8N6cPgEfxh0DEUKoZpCnnqXpzKWSwHAaxWgreT2PCW8CCl6cVBQxrUuPBs-4bAdxaYngjYwbhI4AozGBgOcWF0TfV-ocaXeFNLBXYaJp6mxt-km4qoPY1zMMK9w1TFlRZ7IiPr6eTcagqZseREQKxAIHawS2ytdivKl-GudpF3awO0RpoTEZBmEAFNatoy7EeJiXu1Ak2fnXU0bsRA3DoJfBQHOlR4g_zt5BZPU3tXqNr8xvxy",
+      "domain": "logindev.bcen.org",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "SSISID",
+      "value": "11D622D3",
+      "domain": ".bcen.org",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ssisid",
+      "value": "11D622D3",
+      "domain": ".bcen.org",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "P_CUST_ID",
+      "value": "105307",
+      "domain": ".bcen.org",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "p_cust_id",
+      "value": "105307",
+      "domain": ".bcen.org",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "SSALOGIN",
+      "value": "yes",
+      "domain": ".bcen.org",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ssalogin",
+      "value": "yes",
+      "domain": ".bcen.org",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "BREADCRUMB_SESSION_ID",
+      "value": "1748757",
+      "domain": ".bcen.org",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "breadcrumb_session_id",
+      "value": "1748757",
+      "domain": ".bcen.org",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://online.bcen.org",
+      "localStorage": [
+        {
+          "name": "_pendo_accountId.dfaece60-44a4-4fcc-40ef-a08918c334f7",
+          "value": "{\"ttl\":1743677290843,\"value\":\"BCENDEV\"}"
+        },
+        {
+          "name": "_pendo_meta.dfaece60-44a4-4fcc-40ef-a08918c334f7",
+          "value": "{\"ttl\":1743677286221,\"value\":1461284256}"
+        },
+        {
+          "name": "_pendo_guides_blocked.dfaece60-44a4-4fcc-40ef-a08918c334f7",
+          "value": "{\"ttl\":1735051687466,\"value\":\"0\"}"
+        },
+        {
+          "name": "_pendo_visitorId.dfaece60-44a4-4fcc-40ef-a08918c334f7",
+          "value": "{\"ttl\":1743677290843,\"value\":\"DBROWN@BCENDEV\"}"
+        }
+      ]
+    }
+  ]
+}

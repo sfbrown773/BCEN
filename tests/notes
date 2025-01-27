@@ -1,0 +1,248 @@
+async clickButtonWithRetry(buttonLocator: Locator, expectedUrl: string, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+          console.log(`Attempt ${attempt + 1}: Clicking the button.`);
+          
+          // Add event listener for navigation
+          const navigationPromise = this.page.waitForNavigation({ url: expectedUrl, timeout: 5000 });
+          
+          // Click the button
+          await buttonLocator.click();
+          
+          // Wait for navigation to occur
+          await navigationPromise;
+          console.log('Navigation successful after button click.');
+          return; // Exit on success
+      } catch (error) {
+          console.log(`Attempt ${attempt + 1} failed: ${error.message}`);
+          if (attempt < maxRetries - 1) {
+              console.log('Retrying...');
+              // Optionally reload or refocus the page
+              await this.page.reload();
+              await this.page.waitForLoadState('load');
+          }
+      }
+  }
+  throw new Error(`Failed to navigate to ${expectedUrl} after clicking button in ${maxRetries} attempts.`);
+}
+
+
+async clickCheckoutButton() {
+  await this.page.waitForLoadState('load');
+  await this.page.waitForTimeout(500);
+
+  for (let i = 0; i < 3; i++) {
+      try {
+          // Wait for the checkout button to become visible
+          console.log(`Attempt ${i + 1}: Waiting for checkout button to appear.`);
+          await this.checkoutButton.waitFor({ state: 'visible', timeout: 5000 });
+          
+          // Click the checkout button
+          console.log('Checkout button is visible, clicking...');
+          await this.checkoutButton.click();
+
+          // Wait for the page to load and check the workflow title
+          await this.page.waitForLoadState('load');
+          const workflowTitleText = await this.workflowTitle.innerText();
+          console.log(`Workflow title after clicking: ${workflowTitleText}`);
+
+          if (workflowTitleText.includes('Checkout and Make Payment')) {
+              console.log('Successfully navigated to the checkout page.');
+              return;
+          } else {
+              console.log('Workflow title is incorrect, reloading page...');
+              await this.page.reload();
+              await this.page.waitForLoadState('load');
+          }
+      } catch (error) {
+          console.log(`Attempt ${i + 1} failed: ${error.message}`);
+          console.log('Reloading page and retrying...');
+          await this.page.reload();
+          await this.page.waitForLoadState('load');
+      }
+  }
+
+  throw new Error('Failed to click checkout button or verify workflow title after 3 attempts.');
+}
+
+
+certCBRNFixtures.describe.configure({ mode: 'serial' });
+certCBRNFixtures.describe.only('checkout tests', () => {
+    let submittalURL: string;
+    //THIS METHODOLOGY IS TEMPORARY...SAVES A GIVEN CHECKOUT SCREEN'S TO A JSON FILE TO RETURN TO IN OTHER TESTS
+    let browserContext: BrowserContext // Shared browser context
+    let sharedPage: Page // Shared page instance
+  
+    certCBRNFixtures.beforeAll(async ({ browser, homePage }) => {
+      // Manually create a browser context and page
+      browserContext = await browser.newContext();
+      sharedPage = await browserContext.newPage();
+  
+      // Perform actions to grab the submittal URL
+      const certCBRN = new Flow(sharedPage); // Assuming CertCBRN is your page object
+      await homePage.visit();
+      await homePage.removeSubmittal('CBRN')
+      await certCBRN.visitCBRN();
+      await certCBRN.fillOutExamInfo_CBRN();
+      await certCBRN.clickNext();
+      await certCBRN.clickNoTestAssurance();
+      await certCBRN.clickNext();
+      await certCBRN.clickNext();
+      await certCBRN.clickCheckoutButton();
+      await expect(certCBRN.workflowTitle).toHaveText('Checkout and Make Payment');
+  
+      // Save the submittal URL
+      submittalURL = sharedPage.url();
+      console.log('Captured submittal URL:', submittalURL);
+    });
+  
+    certCBRNFixtures.beforeEach(async () => {
+      // Navigate to the shared submittal URL before each test
+      await sharedPage.goto(submittalURL);
+      await sharedPage.waitForLoadState('load');
+    });
+  
+    certCBRNFixtures('add blank voucher', async () => {
+      const certCBRN = new Flow(sharedPage); // Reuse the shared page
+      await certCBRN.clickAddVoucher();
+      await expect(certCBRN.voucherErrorPopup).toBeVisible();
+      await certCBRN.clickCloseVoucherError();
+      await expect(certCBRN.addVoucherButton).toBeVisible();
+    });
+  
+    certCBRNFixtures('payment type visibility - credit', async () => {
+      const certCBRN = new Flow(sharedPage); // Reuse the shared page
+      await certCBRN.selectPaymentOption('CREDIT CARD');
+      await expect(certCBRN.creditCardOptions).toBeVisible();
+      await certCBRN.selectCreditCard('0K'); // 'OK' is AE, 'OJ' is Visa/Discover/MC
+      await expect(certCBRN.submitButton).toBeVisible();
+    });
+  
+    certCBRNFixtures('payment type visibility - echeck/ach', async () => {
+      const certCBRN = new Flow(sharedPage); // Reuse the shared page
+      await certCBRN.selectPaymentOption('ACHRT');
+      await expect(certCBRN.submitButton).toBeVisible();
+    });
+  
+    certCBRNFixtures('payment type visibility - check', async () => {
+      const certCBRN = new Flow(sharedPage); // Reuse the shared page
+      await certCBRN.paymentOptions.click();
+      await certCBRN.selectPaymentOption('PAY_BY_CHECK');
+      await certCBRN.paymentOptions.click();
+      await expect(certCBRN.submitButton).toBeVisible();
+    });
+  
+    certCBRNFixtures('pay', async () => {
+      const certCBRN = new Flow(sharedPage); // Reuse the shared page
+      await certCBRN.selectPaymentOption('CREDIT CARD');
+      await expect(certCBRN.creditCardOptions).toBeVisible();
+      await certCBRN.selectCreditCard('0K'); // 'OK' is AE, 'OJ' is Visa/Discover/MC
+      await expect(certCBRN.submitButton).toBeVisible();
+      await certCBRN.clickSubmitCheckout();
+      await sharedPage.waitForLoadState('load');
+  
+      await certCBRN.fillCardNumber('341111597242000');
+      await certCBRN.selectMonth('12');
+      await certCBRN.selectYear('2025');
+      await certCBRN.fillCVV('1154');
+      await certCBRN.submitCardDetails();
+      await expect(certCBRN.workflowTitle).toContainText(/Exam Authorized/i);
+    });
+  
+    certCBRNFixtures.afterAll(async () => {
+      // Cleanup the browser context and shared page
+        if (sharedPage) {
+          await sharedPage.close();
+        }
+        if (browserContext) {
+          await browserContext.close();
+        }
+    });
+  });
+
+
+test.beforeEach(async ({
+    page
+}) => {
+    const homePage = new HomePage(page);
+    await homePage.open();
+
+    // Check if "Apply for Certification" text is present
+    const certFlowWiped = await page.locator('htmldb\\:box_body').innerText()
+      .then(text => text.includes('Apply for Certification'));
+    
+    if (!certFlowWiped) {
+      // Get the href attribute from the anchor tag
+      const thisUrl = await page.locator('htmldb\\:box_body a').getAttribute('href');
+      console.log('Extracted URL:', thisUrl);
+    
+      if (thisUrl) {
+        // Use a regular expression to extract two sequences of six digits
+        const match = thisUrl.match(/(\d{6})\D+(\d{6})/);
+    
+        if (match) {
+          const submittalNum = match[1];
+          const workflowNum = match[2];
+          console.log(`Submittal Number: ${submittalNum}`);
+          console.log(`Workflow Number: ${workflowNum}`);
+    
+          // Navigate to the removal URL
+          const removalUrl = `https://online.bcen.org/bcendevssa/acgiapps.cf_remove_submittal?p_submittal_serno=${submittalNum}&p_wkf_serno=${workflowNum}`;
+          await page.goto(removalUrl);
+    
+          // Verify the submittal was removed
+          await expect(page.locator('body')).toHaveText(`Submittal ${submittalNum} Removed`);
+        } else {
+          console.log('No matching sequences of six numbers found in the URL.');
+        }
+      } else {
+        console.log('No URL found in the anchor tag.');
+      }
+    }
+    });
+
+
+
+
+
+
+<a href="ssaapexmnucall?p_app_id=STDSSA&amp;p_page_id=1010&amp;p_session=16280246835105&amp;p_itemnames=P0_SUBMITTAL_SERNO,G_WKF_FL,G_WKF_SERNO,G_WKF_TRANS_VERB,CUST_CONTEXT,P0_ATTRPAGE_CONTEXT,P0_ATTRPAGE_QUAL2,P0_MODE,P1010_FORM_CD,P0_CONTEXT_HEADER_CD&amp;p_itemvalues=460542,Y,627838,CENEXAMINFORMATION,CEN_EXAM_INFO_PEND,SBM,CEN_CPEN_EXAM_INFORMATION,UPDATE,CEN_CPEN_EXAM_INFORMATION,SBM">In Process </a>
+
+This is how I tried to do the removeSubmittal() by extending 'test' in config.
+
+import { test as baseTest, chromium, expect } from '@playwright/test';
+
+// Extend the base test with custom fixtures
+export const test = baseTest.extend<{
+  appActions: {
+    removeSubmittal: (url:string) => Promise<void>;
+  };
+}>({
+  appActions: async ({}, use) => {
+    const appActions = {
+      async removeSubmittal(url:string) {
+        // Launch the browser and create a new page
+        const browser = await chromium.launch({ headless: true });
+        const page = await browser.newPage();
+        // Use a regular expression to find two sequences of exactly six digits
+        const match = url.match(/(\d{6})\D+(\d{6})/);
+        console.log(match);
+    
+        if (match) {
+        const submittalNum = match[1];
+        const workflowNum = match[2];
+        console.log(`Submittal Number: ${submittalNum}`);
+        console.log(`Workflow Number: ${workflowNum}`);
+        await page.goto(`https://online.bcen.org/bcendevssa/acgiapps.cf_remove_submittal?p_submittal_serno=${submittalNum}&p_wkf_serno=${workflowNum}`);
+        await expect(page.locator('body')).toHaveText(`Submittal ${submittalNum} Removed`);
+        } else {
+        console.log('No matching sequences of six numbers found in the URL.');
+        }
+
+        await browser.close();
+    },
+    };
+
+    await use(appActions);
+  },
+});
