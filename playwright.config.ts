@@ -33,6 +33,7 @@ export default defineConfig({
     launchOptions: {
       slowMo: 400,
     },
+    headless: true,
     screenshot: 'only-on-failure', 
     video: 'retain-on-failure',
      storageState: './authState.json',
