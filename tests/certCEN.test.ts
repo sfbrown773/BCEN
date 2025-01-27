@@ -1,4 +1,4 @@
-import { certCENFixtures, expect } from "../fixtures/certCen.fixtures";
+import { certCENFixtures, expect } from '../fixtures/certCEN.fixtures';
 import fs from 'fs';
 
 
