@@ -21,7 +21,7 @@ certCTRNFixtures('update home page label to in progress', async ({
     }) => {
     await certCTRN.fillOutExamInfo_CTRN();
     await certCTRN.clickNext();
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
     await expect(certCTRN.workflowTitle).toHaveText('Test Assurance');
     await homePage.visit();
     await expect(homePage.buttonCTRN).toContainText(/In Process/i);
@@ -34,14 +34,14 @@ certCTRNFixtures('update home page label to checkout', async ({
     }) => {
     await certCTRN.fillOutExamInfo_CTRN();
     await certCTRN.clickNext();
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
     await expect(certCTRN.workflowTitle).toHaveText('Test Assurance');
     await certCTRN.clickNoTestAssurance();
     await certCTRN.clickNext();
     await certCTRN.clickNext();
     await certCTRN.clickCheckoutButton();
     //the problem with this next step is a simple timeout issue due to load time.
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
     await expect(certCTRN.workflowTitle).toHaveText('Checkout and Make Payment');
     //Checkout
     await homePage.visit();
@@ -54,10 +54,10 @@ certCTRNFixtures('update home page label to military documentation review', asyn
     page
     }) => {
     await certCTRN.fillOutYesMil_CTRN();
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
     await expect(certCTRN.workflowTitle).toHaveText('Upload Military Documentation');
     await certCTRN.fileInput.setInputFiles(certCTRN.filePath);
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
     await expect(certCTRN.uploadMessage).toContainText('successfully uploaded');
     await certCTRN.clickNext();
     await page.getByRole('link', { name: 'Advance to Military' }).click();
@@ -113,11 +113,21 @@ certCTRNFixtures('yes exam accomodation, add step to left bar', async ({
     certCTRN,
     page
     }) => {
-    await certCTRN.fillOutExamInfo_CTRN();
-    await certCTRN.clickYesExamAccom();
-    await certCTRN.clickNext();
-    await page.waitForLoadState('load');
-    await expect(certCTRN.examAccommLeftBar).toBeVisible();
+        await certCTRN.fillOutExamInfo_CTRN();
+        await certCTRN.clickYesExamAccom();
+        await certCTRN.clickNext();
+        await page.waitForLoadState('networkidle');
+    
+        if (await certCTRN.mobileDropdown.isVisible()) {
+            // Mobile View: Check if the dropdown contains "Exam Accommodation"
+            const options = await certCTRN.mobileDropdown.locator('option').allTextContents();
+            expect(options).toContain('Exam Accommodation Request');
+            console.log("Mobile view: Verified 'Exam Accommodation' exists in dropdown.");
+        } else {
+            // Desktop View: Check if the left bar step is visible
+            await expect(certCTRN.examAccommLeftBar).toBeVisible();
+            console.log("Desktop view: Verified 'Exam Accommodation' is in left bar.");
+        }
     });
 
 certCTRNFixtures('expect next button hidden', async ({
@@ -175,13 +185,13 @@ certCTRNFixtures('side graphic matches header, has orange color', async ({
         await certCTRN.fillOutExamInfo_CTRN();
         await certCTRN.clickNext();
         //test assurance
-        await certCTRN.goToTestAssurance();
         await certCTRN.checkHeaderMatchesSidebar();
+        await certCTRN.clickNoTestAssurance();
+        await certCTRN.clickNext();
         //credential verification
-        await certCTRN.goToCredentialVerification();
         await certCTRN.checkHeaderMatchesSidebar();
+        await certCTRN.clickNext();
         //status
-        await certCTRN.goToStatus();
         await certCTRN.checkHeaderMatchesSidebar();
     });
 

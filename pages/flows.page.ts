@@ -41,6 +41,8 @@ export class Flow extends AppPage {
     public affirmCheckbox = this.page.getByLabel('I AFFIRM');
     public licenseNumber = this.page.getByLabel('Enter your United States or');
     public stateDropdown = this.page.locator('#aaAttrTy_RNSTATE_LOV');
+    public internationalMessage = this.page.locator('#aaAttrTy_RNSTATE')
+    public internationalInput = this.page.getByPlaceholder('Enter Country');
     public memberASTNAToggle = this.page.locator('#aaAttrTy_ASTNAMEMBER_LOV');
     public memberNumberASTNA = this.page.locator('#aaAttrty_ASTNAMEMBER input[name="f47"]');
 
@@ -69,8 +71,14 @@ export class Flow extends AppPage {
     public file1NoFile = this.page.locator('#aaAttrty_MILITARYDOCUPLOAD_FILE')
     public fileInput2 = this.page.locator('#aaAttrty_MILITARYDOCUPLOAD2_FILE input[name="FILE"]');
     public deleteFile2 = this.page.locator('#aaAttrty_MILITARYDOCUPLOAD2_FILE #aaRemoveFileBtn');
-    public file2NoFile = this.page.locator('#aaAttrty_MILITARYDOCUPLOAD2_FILE')
-    public examAccommUpload = this.page.locator('#aaAttrty_TESTACCOMUPLOAD_FILE input[type="file"]')
+    public file2NoFile = this.page.locator('#aaAttrty_MILITARYDOCUPLOAD2_FILE');
+    public examAccommUpload = this.page.locator('#aaAttrty_TESTACCOMUPLOAD_FILE input[type="file"]');
+
+    public fileInputIntlRN = this.page.locator('#aaAttrty_INTLDOCUPLOAD_FILE input[name="FILE"]');
+    public deleteFileIntlRN = this.page.locator('#aaAttrty_INTLDOCUPLOAD_FILE #aaRemoveFileBtn');
+    public uploadMessageIntlRN = this.page.locator('#aaAttrty_INTLDOCUPLOAD_FILE div.aafileUploadMsg');
+    public submitIntlReview = this.page.getByRole('link', { name: 'Submit to Staff Review' });
+
     public accomUploadMessage = this.page.locator('#aaAttrty_TESTACCOMUPLOAD_FILE div.aafileUploadMsg');
     public accomNoFile = this.page.locator('#aaAttrty_TESTACCOMUPLOAD_FILE');
     public deleteExamAccom = this.page.getByLabel('Remove File');
@@ -173,6 +181,9 @@ export class Flow extends AppPage {
     }
     async selectState(state:string) {
         await this.stateDropdown.selectOption(state);
+    }
+    async fillIntlCountry(country:string) {
+        await this.internationalInput.fill(country);
     }
     async selectMembershipABA(yesno:string) {
         await this.memberABAToggle.selectOption(yesno);
@@ -299,29 +310,29 @@ export class Flow extends AppPage {
           });
         });
       }
-      async checkBoxesOneByOne() {
-        // Locate all checkboxes within the acknowledgementsDiv
-        const checkboxes = await this.acknowledgementsDiv.locator('input[type="checkbox"]');
-      
-        // Step 1: Check all checkboxes
-        const count = await checkboxes.count();
-        for (let i = 0; i < count; i++) {
-          await checkboxes.nth(i).check();
-        }
-      
-        // Step 2: Verify the next button is visible after all checkboxes are checked
+    async checkBoxesOneByOne() {
+    // Locate all checkboxes within the acknowledgementsDiv
+    const checkboxes = await this.acknowledgementsDiv.locator('input[type="checkbox"]');
+    
+    // Step 1: Check all checkboxes
+    const count = await checkboxes.count();
+    for (let i = 0; i < count; i++) {
+        await checkboxes.nth(i).check();
+    }
+    
+    // Step 2: Verify the next button is visible after all checkboxes are checked
+    await expect(this.nextButton).toBeVisible();
+    
+    // Step 3: Uncheck each checkbox one by one and verify the next button disappears
+    for (let i = 0; i < count; i++) {
+        await checkboxes.nth(i).uncheck();
+        await expect(this.nextButton).toBeHidden();
+    
+        // Step 4: Recheck the checkbox and verify the next button reappears
+        await checkboxes.nth(i).check();
         await expect(this.nextButton).toBeVisible();
-      
-        // Step 3: Uncheck each checkbox one by one and verify the next button disappears
-        for (let i = 0; i < count; i++) {
-          await checkboxes.nth(i).uncheck();
-          await expect(this.nextButton).toBeHidden();
-      
-          // Step 4: Recheck the checkbox and verify the next button reappears
-          await checkboxes.nth(i).check();
-          await expect(this.nextButton).toBeVisible();
-        }
-      }
+    }
+    }
       
       
     async clickNext(/*expectedUrl: string*/) {
@@ -385,6 +396,10 @@ export class Flow extends AppPage {
       };
     
     async checkHeaderMatchesSidebar() {
+        if (await this.page.locator('#wizard-steps-dropdown').isVisible()) {
+            console.log("In mobile view this test doesn't apply.");
+            return; // Exit early as the test is not applicable
+        }
                 //run this on every page of the flow
                 await this.page.waitForSelector('#workflowTitle');
                 await expect(this.page.locator('#workflowTitle')).toBeVisible();
@@ -551,6 +566,7 @@ export class Flow extends AppPage {
             }
 
 public examAccommLeftBar = this.page.getByRole('link', { name: 'Exam Accommodation Request' });
+public mobileDropdown = this.page.locator('#wizard-steps-dropdown');
 public examAccomHeading = this.page.getByRole('heading', { name: 'Exam Accommodation Request' }).locator('span');
 public voucherErrorPopup = this.page.getByText('Error Using Voucher');
 public closeButtonVoucherPopup = this.page.getByRole('button', { name: ' Close' });

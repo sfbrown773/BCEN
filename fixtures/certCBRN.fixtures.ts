@@ -1,11 +1,12 @@
 import { test as base } from '@playwright/test';
 import { HomePage } from '../pages/home.page';
 import { Flow } from '../pages/flows.page';
+import { BackOffice } from '../pages/backOffice.page';
 
 type MyFixtures = {
     homePage:HomePage,
     certCBRN:Flow,
-    skipBeforeEach: boolean;
+    backOffice:BackOffice
 
   };
   export const certCBRNFixtures = base.extend<MyFixtures>({
@@ -23,9 +24,12 @@ type MyFixtures = {
       const certCBRN = new Flow(page);
       await use(certCBRN);
     },
-    skipBeforeEach: async ({}, use) => {
-      await use(false);
-    },
+    backOffice: async ({
+      page
+    }, use) => {
+      const backOffice = new BackOffice(page)
+      await use(backOffice);
+    }
   });
   export {
     expect,

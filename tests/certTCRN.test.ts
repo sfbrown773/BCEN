@@ -113,11 +113,21 @@ certTCRNFixtures('yes exam accomodation, add step to left bar', async ({
     certTCRN,
     page
     }) => {
-    await certTCRN.fillOutExamInfo_TCRN();
-    await certTCRN.clickYesExamAccom();
-    await certTCRN.clickNext();
-    await page.waitForLoadState('load');
-    await expect(certTCRN.examAccommLeftBar).toBeVisible();
+        await certTCRN.fillOutExamInfo_TCRN();
+        await certTCRN.clickYesExamAccom();
+        await certTCRN.clickNext();
+        await page.waitForLoadState('networkidle');
+    
+        if (await certTCRN.mobileDropdown.isVisible()) {
+            // Mobile View: Check if the dropdown contains "Exam Accommodation"
+            const options = await certTCRN.mobileDropdown.locator('option').allTextContents();
+            expect(options).toContain('Exam Accommodation Request');
+            console.log("Mobile view: Verified 'Exam Accommodation' exists in dropdown.");
+        } else {
+            // Desktop View: Check if the left bar step is visible
+            await expect(certTCRN.examAccommLeftBar).toBeVisible();
+            console.log("Desktop view: Verified 'Exam Accommodation' is in left bar.");
+        }
     });
 
 certTCRNFixtures('expect next button hidden', async ({
@@ -175,13 +185,13 @@ certTCRNFixtures('side graphic matches header, has orange color', async ({
         await certTCRN.fillOutExamInfo_TCRN();
         await certTCRN.clickNext();
         //test assurance
-        await certTCRN.goToTestAssurance();
         await certTCRN.checkHeaderMatchesSidebar();
+        await certTCRN.clickNoTestAssurance();
+        await certTCRN.clickNext();
         //credential verification
-        await certTCRN.goToCredentialVerification();
         await certTCRN.checkHeaderMatchesSidebar();
+        await certTCRN.clickNext();
         //status
-        await certTCRN.goToStatus();
         await certTCRN.checkHeaderMatchesSidebar();
     });
 

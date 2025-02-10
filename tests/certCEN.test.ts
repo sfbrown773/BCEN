@@ -1,4 +1,5 @@
 import { certCENFixtures, expect } from '../fixtures/certCEN.fixtures';
+import { BackOffice } from '../pages/backOffice.page';
 import fs from 'fs';
 
 
@@ -21,7 +22,7 @@ certCENFixtures('update home page label to in progress', async ({
     }) => {
     await certCen.fillOutExamInfo_CEN();
     await certCen.clickNext();
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
     await expect(certCen.workflowTitle).toHaveText('Test Assurance');
     await homePage.visit();
     await expect(homePage.buttonCEN).toContainText(/In Process/i);
@@ -34,14 +35,14 @@ certCENFixtures('update home page label to checkout', async ({
     }) => {
     await certCen.fillOutExamInfo_CEN();
     await certCen.clickNext();
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
     await expect(certCen.workflowTitle).toHaveText('Test Assurance');
     await certCen.clickNoTestAssurance();
     await certCen.clickNext();
     await certCen.clickNext();
     await certCen.clickCheckoutButton();
     //the problem with this next step is a simple timeout issue due to load time.
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
     await expect(certCen.workflowTitle).toHaveText('Checkout and Make Payment');
     //Checkout
     await homePage.visit();
@@ -56,13 +57,13 @@ certCENFixtures('delete items from checkout', async ({
     }) => {
     await certCen.fillOutExamInfo_CEN();
     await certCen.clickNext();
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
     await expect(certCen.workflowTitle).toHaveText('Test Assurance');
     await certCen.clickNoTestAssurance();
     await certCen.clickNext();
     await certCen.clickNext();
     await certCen.clickCheckoutButton();
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
     await page.pause();
     await expect(certCen.checkoutItem).toBeVisible();
     //Checkout
@@ -135,18 +136,27 @@ certCENFixtures('yes exam accomodation, add step to left bar', async ({
     certCen,
     page
     }) => {
-    await certCen.fillOutExamInfo_CEN();
-    await certCen.clickYesExamAccom();
-    await certCen.clickNext();
-    await page.waitForLoadState('load');
-    await expect(certCen.examAccommLeftBar).toBeVisible();
+        await certCen.fillOutExamInfo_CEN();
+        await certCen.clickYesExamAccom();
+        await certCen.clickNext();
+        await page.waitForLoadState('networkidle');
+    
+        if (await certCen.mobileDropdown.isVisible()) {
+            // Mobile View: Check if the dropdown contains "Exam Accommodation"
+            const options = await certCen.mobileDropdown.locator('option').allTextContents();
+            expect(options).toContain('Exam Accommodation Request');
+            console.log("Mobile view: Verified 'Exam Accommodation' exists in dropdown.");
+        } else {
+            // Desktop View: Check if the left bar step is visible
+            await expect(certCen.examAccommLeftBar).toBeVisible();
+            console.log("Desktop view: Verified 'Exam Accommodation' is in left bar.");
+        }
     });
 
 certCENFixtures('expect next button hidden', async ({
     certCen,
     page
     }) => {
-        await page.pause();
     await expect(certCen.pagination).toContainText('Please complete all required fields');
     await expect(certCen.nextButton).toBeHidden();
     await certCen.fillOutExamInfo_CEN();
@@ -197,13 +207,13 @@ certCENFixtures('side graphic matches header, has orange color', async ({
         await certCen.fillOutExamInfo_CEN();
         await certCen.clickNext();
         //test assurance
-        await certCen.goToTestAssurance();
         await certCen.checkHeaderMatchesSidebar();
+        await certCen.clickNoTestAssurance();
+        await certCen.clickNext();
         //credential verification
-        await certCen.goToCredentialVerification();
         await certCen.checkHeaderMatchesSidebar();
+        await certCen.clickNext();
         //status
-        await certCen.goToStatus();
         await certCen.checkHeaderMatchesSidebar();
     });
 
@@ -300,7 +310,7 @@ certCENFixtures('side graphic matches header, has orange color', async ({
                 await page.waitForLoadState('load');
                 await certCen.checkoutTable.waitFor({ state: 'visible' });
                 //move to checkout
-                await expect(certCen.checkoutTable).toContainText(certCen.priceYesMemNoAssur_CEN);
+                await expect(certCen.checkoutTable).toContainText(certCen.priceYesMemNoAssur_others);
                 await certCen.clearCheckout();
     
                 await expect(certCen.checkoutTable).toBeHidden();
@@ -427,7 +437,7 @@ certCENFixtures('grab checkout url, save to json', async ({
             await expect(certCen.workflowTitle).toContainText('Checkout and Make Payment');
     });
 //DO NOT RUN THIS NEXT TEST UNTIL WE HAVE A WAY TO UNDO THIS PROCESS
-    certCENFixtures.skip('successful case', async ({
+    certCENFixtures('successful case', async ({
         certCen,
         page,
         homePage
@@ -437,10 +447,12 @@ certCENFixtures('grab checkout url, save to json', async ({
             await certCen.selectMonth('12');
             await certCen.selectYear('2025');
             await certCen.submitCardDetails();
-            await page.waitForLoadState('load');
+            await page.waitForLoadState('networkidle');
+            await page.pause();
+            await expect(page.locator("#bcenCertMessage")).toBeVisible();
+            await expect(certCen.workflowTitle).toContainText(/Exam Authorized/);
 
             await homePage.visit();
             await expect(homePage.buttonCEN).toContainText(/SCHEDULE\/MANAGE EXAM/i);
-
     });
   });

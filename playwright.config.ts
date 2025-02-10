@@ -16,10 +16,10 @@ export default defineConfig({
   expect: {
     timeout: 10000 // 10 seconds
   },
-  timeout: 200000,
+  timeout: 180000,
   testDir: './tests',
-  retries: 2,
-  //retries: process.env.CI ? 2 : 0,No overload matches this call.
+  //retries: 2,
+  retries: process.env.CI ? 2 : 0,
   //THIS CHANGES DYNAMICALLY DEPENDING ON WHETHER THIS RUNS IN A CI PIPELINE, retry in CI only
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -31,7 +31,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     launchOptions: {
-      slowMo: 400,
+      slowMo: 300,
     },
     headless: true,
     screenshot: 'only-on-failure', 
@@ -47,13 +47,15 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
 //    { name: 'setup', testMatch: /.*\.setup\.ts/ },  //REACTIVATE
-    {
+   {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'],
 //        storageState: './authState.json',          //REACTIVATE
        },
 //       dependencies: ['setup'],                    //Reactivate
     },
+    
+    
 
     /*{
       name: 'firefox',
@@ -65,12 +67,15 @@ export default defineConfig({
       use: { ...devices['Desktop Safari'] },
     },*/
     
-
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
+    
+    /* Test against mobile viewports.
+    {
+       name: 'Mobile Chrome',
+       use: { ...devices['Pixel 5'],
+        storageState: './authState.json',
+      },     
+      },    */
+           
     // {
     //   name: 'Mobile Safari',
     //   use: { ...devices['iPhone 12'] },

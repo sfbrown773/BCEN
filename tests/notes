@@ -1,3 +1,131 @@
+
+
+  // await expect(page.getByRole('link', { name: 'Staff > Accommodation NMI' })).toBeVisible();
+  // await expect(page.getByRole('link', { name: 'Staff > Exam Eligible', exact: true })).toBeVisible();
+  // await expect(page.getByRole('link', { name: 'Staff > Exam Eligible Accommodation Rejected' })).toBeVisible();
+
+//EXAM_ELIGIBLE
+
+ssaapexmnucall?p_app_id=STDSSA&p_page_id=998&p_cust_id=105307&p_session=16222295775835&p_itemnames=P0_SUBMITTAL_SERNO,G_WKF_FL,G_WKF_SERNO,G_WKF_TRANS_VERB,CUST_CONTEXT,P0_CONTEXT_HEADER_CD&p_itemvalues=462171,Y,629471,RNNMI,INTL_RN_NMI,SBM
+ssaapexmnucall?p_app_id=STDSSA&p_page_id=1010&p_session=7970343953706&p_itemnames=P0_SUBMITTAL_SERNO,G_WKF_FL,G_WKF_SERNO,G_WKF_TRANS_VERB,CUST_CONTEXT,P0_ATTRPAGE_CONTEXT,P0_ATTRPAGE_QUAL2,P0_MODE,P1010_FORM_CD,P0_CONTEXT_HEADER_CD&p_itemvalues=462172,Y,629472,CFRNCTRNEXAMINFORMATION,CFRN_EXAM_INFO_PEND,SBM,CFRN_CTRN_EXAM_INFORMATION,UPDATE,CFRN_CTRN_EXAM_INFORMATION,SBM
+SBM_RELAY_TO_CHECKOUT?P_SUBMITTAL_SERNO=462182&P_WKF_SERNO=629482&P_TRANSITION_VERB=CHECKOUT&P_CATEGORY_CD=INITIAL_APP&P_CERT_TY=CBRN&P_PRICE_CD=
+
+
+await page.getByRole('button', { name: 'restore Recent' }).click();
+await page.getByRole('link', { name: 'badge Johnette K Bennage' }).click();
+await page.getByRole('link', { name: 'Customer Attributes' }).click();
+await page.getByRole('link', { name: 'Update Customer Attributes' }).first().click();
+await page.getByLabel('No', { exact: true }).check();
+await page.getByRole('button', { name: 'Update' }).nth(1).click();
+
+await page.goto('https://online.bcen.org/bcendev/sbmssamysubmittals.review_page?p_submittal_serno=462068&p_wkf_serno=629368');
+await page.getByRole('link', { name: 'Staff - Finalize Decision' }).click();
+await page.getByRole('link', { name: 'Staff - Review Documentation' }).click();
+await page.getByLabel('Approve').check();
+await page.getByRole('button', { name: 'Next' }).click();
+await page.getByRole('link', { name: 'Move Application back to' }).click();
+await page.locator('#wwvFlowForm').click();
+await page.getByRole('link', { name: 'Staff - Submit > Invalid' }).click();
+await page.getByRole('button', { name: 'restore Recent' }).click();
+await page.getByRole('link', { name: 'badge Johnette K Bennage' }).click();
+await page.getByRole('link', { name: 'Customer Attributes' }).click();
+await page.getByRole('link', { name: 'Update Customer Attributes' }).first().click();
+await page.getByLabel('No', { exact: true }).check();
+await page.getByRole('button', { name: 'Update' }).nth(1).click();
+await page.getByRole('button', { name: 'restore Recent' }).click();
+await page.getByRole('link', { name: 'badge Johnette K Bennage' }).click();
+await page.getByRole('link', { name: 'Customer Attributes' }).click();
+await page.getByRole('link', { name: 'Update Customer Attributes' }).first().click();
+await page.getByLabel('Yes', { exact: true }).check();
+await page.getByRole('button', { name: 'Update' }).nth(1).click();
+await page.getByRole('button', { name: 'restore Recent' }).click();
+await page.getByRole('link', { name: 'badge Johnette K Bennage' }).click();
+const page1Promise = page.waitForEvent('popup');
+await page.getByRole('link', { name: 'Login as this Customer' }).click();
+const page1 = await page1Promise;
+await page1.getByRole('link', { name: 'My Account' }).click();
+await page1.locator('li').filter({ hasText: 'Certified Burn Registered Nurse In Process' }).getByRole('link').click();
+await page1.getByRole('link', { name: 'Next chevron_right' }).click();
+await page1.getByRole('link', { name: 'My Dashboard' }).click();
+await page.getByRole('link', { name: 'Customer Attributes' }).click();
+await page.getByRole('link', { name: 'Update Customer Attributes' }).first().click();
+await page.getByLabel('No', { exact: true }).check();
+await page.getByRole('button', { name: 'Update' }).nth(1).click();
+await page1.locator('li').filter({ hasText: 'Certified Burn Registered Nurse In Process' }).getByRole('link').click();
+await page1.getByRole('link', { name: 'Next chevron_right' }).click();
+await page1.locator('#aaAttrty_MILITARYDOCUPLOAD_FILE').getByRole('button', { name: 'Choose File' }).click();
+await page1.locator('#aaAttrty_MILITARYDOCUPLOAD_FILE').getByRole('button', { name: 'Choose File' }).setInputFiles('README.md');
+await page1.getByRole('link', { name: 'Next chevron_right' }).click();
+await page1.getByRole('link', { name: 'Advance to Military' }).click();
+await page.getByRole('button', { name: 'restore Recent' }).click();
+await page.getByRole('link', { name: 'badge Johnette K Bennage' }).click();
+await page.locator('#iframe_51000001261').contentFrame().getByRole('link', { name: 'Application Created On' }).click();
+await page.locator('#iframe_51000001261').contentFrame().getByRole('button', { name: '' }).click();
+await page.locator('#iframe_51000001261').contentFrame().getByRole('link', { name: '462069' }).click();
+await page.getByRole('link', { name: 'Staff - Review Documentation' }).click();
+await page.getByLabel('Deny').check();
+await page.getByRole('button', { name: 'Next' }).click();
+await page.getByRole('link', { name: 'Move application back to' }).click();
+await page.getByRole('link', { name: 'Staff - Submit > Invalid' }).click();
+await page.getByRole('button', { name: 'restore Recent' }).click();
+await page.getByRole('link', { name: 'badge Johnette K Bennage' }).click();
+await page.locator('#iframe_51000001261').contentFrame().getByRole('link', { name: '462070' }).click();
+await page.getByRole('link', { name: 'Staff - Review Documentation' }).click();
+await page.getByLabel('Need More Information').check();
+await page.getByRole('button', { name: 'Next' }).click();
+await page.getByRole('link', { name: 'Staff > Need More Information' }).click();
+await expect(page.locator('#aaSbmHeaderSubmittalStatus')).toContainText('Status: Need More Information for Military Documentation');
+await page.getByRole('link', { name: 'Military Discount - More' }).click();
+await page.getByRole('button', { name: 'Next' }).click();
+await page.goto('https://online.bcen.org/bcendevssa/f?p=STDSSA:998:5932985842304::::P0_SUBMITTAL_SERNO,G_WKF_FL,G_WKF_SERNO,G_WKF_TRANS_VERB,CUST_CONTEXT,P0_CONTEXT_HEADER_CD:462070,Y,629370,INSTRUCTIONS,MILITARY_NMI,SBM');
+await expect(page.locator('#workflowTitle')).toBeVisible();
+await page.getByRole('link', { name: 'Next chevron_right' }).click();
+await page.getByRole('button', { name: 'Add New Comment' }).click();
+await page.getByLabel('Comment', { exact: true }).click();
+await page.getByLabel('Comment', { exact: true }).fill('Comment');
+await page.getByRole('button', { name: 'Save' }).click();
+await page.getByText('Comments for Applicant Comments Add New Comment Johnette K Bennage on 02/04/').click();
+await page.getByRole('link', { name: 'Upload Documentation' }).click();
+await page.getByRole('link', { name: 'Summary' }).click();
+await page.getByRole('link', { name: 'Click to Submit Document for' }).click();
+await page.getByRole('link', { name: 'My Dashboard' }).click();
+await expect(page.locator('htmldb\\:box_body')).toContainText('Military Documentation Review');
+
+
+//this is only in mobile view
+await page1.getByLabel('Toggle navigation').click();
+//the cart
+await expect(page1.getByRole('link', { name: '' })).toBeVisible();
+//alt
+await expect(page.locator('a[id="header-cart"] span[class="bcen-cart-qty"]')).toBeVisible();
+
+
+
+await expect(page1.locator('#wizard-steps-dropdown')).toBeVisible();
+await page1.locator('#wizard-steps-dropdown').selectOption('ssaapexmnucall?p_app_id=STDSSA&p_page_id=1010&p_cust_id=105307&p_session=1474910584975&p_itemnames=P0_SUBMITTAL_SERNO,G_WKF_FL,G_WKF_SERNO,G_WKF_TRANS_VERB,CUST_CONTEXT,P0_ATTRPAGE_CONTEXT,P0_ATTRPAGE_QUAL2,P0_MODE,P1010_FORM_CD,P0_CONTEXT_HEADER_CD&p_itemvalues=461924,Y,629224,SPECACCOMMDETAIL,EXAM_ACCOMM_DETAIL_PEND,SBM,EXAM_ACCOMM_DETAIL,UPDATE,EXAM_ACCOMM_DETAIL,SBM')
+              
+              const baseUrl = 'https://dbrown:Catalyst1@online.bcen.org/bcendev/';
+              const submittalLinks = await frame.locator('tbody').locator('th#C12917984063287606 + td a').all();
+
+              await console.log(submittalLinks);
+
+              await this.page.pause();
+              //td:nth-child(1) a
+              const submittalUrls = (await Promise.all(submittalLinks.map(async link => {
+                  const relativeUrl = await link.getAttribute('href');
+                  return relativeUrl ? `${baseUrl}${relativeUrl}` : null;
+              })))
+                  .filter((url): url is string => url !== null);
+  
+              for (const submittal of submittalUrls) {
+                  try {
+                      await this.page.goto(submittal);
+                      console.log(`Navigated to: ${submittal}`);
+                      await this.page.pause();
+                  } catch (error) {
+                      console.error(`Failed to navigate to: ${submittal}`, error);
+                  }
+
 async clickButtonWithRetry(buttonLocator: Locator, expectedUrl: string, maxRetries = 3) {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {

@@ -1,6 +1,6 @@
 import { certCBRNFixtures, expect } from "../fixtures/certCBRN.fixtures";
 import fs from 'fs';
-
+import { BackOffice } from "../pages/backOffice.page";
 
   certCBRNFixtures.beforeEach('wipe submittals', async ({
     certCBRN,
@@ -21,7 +21,7 @@ certCBRNFixtures('update home page label to in progress', async ({
     }) => {
     await certCBRN.fillOutExamInfo_CBRN();
     await certCBRN.clickNext();
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
     await expect(certCBRN.workflowTitle).toHaveText('Test Assurance');
     await homePage.visit();
     await expect(homePage.buttonCBRN).toContainText(/In Process/i);
@@ -34,14 +34,14 @@ certCBRNFixtures('update home page label to checkout', async ({
     }) => {
     await certCBRN.fillOutExamInfo_CBRN();
     await certCBRN.clickNext();
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
     await expect(certCBRN.workflowTitle).toHaveText('Test Assurance');
     await certCBRN.clickNoTestAssurance();
     await certCBRN.clickNext();
     await certCBRN.clickNext();
     await certCBRN.clickCheckoutButton();
     //the problem with this next step is a simple timeout issue due to load time.
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
     await expect(certCBRN.workflowTitle).toHaveText('Checkout and Make Payment');
     //Checkout
     await homePage.visit();
@@ -54,10 +54,10 @@ certCBRNFixtures('update home page label to military documentation review', asyn
     page
     }) => {
     await certCBRN.fillOutYesMil_CBRN();
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
     await expect(certCBRN.workflowTitle).toHaveText('Upload Military Documentation');
     await certCBRN.fileInput.setInputFiles(certCBRN.filePath);
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
     await expect(certCBRN.uploadMessage).toContainText('successfully uploaded');
     await certCBRN.clickNext();
     await page.getByRole('link', { name: 'Advance to Military' }).click();
@@ -116,15 +116,24 @@ certCBRNFixtures('yes exam accomodation, add step to left bar', async ({
     await certCBRN.fillOutExamInfo_CBRN();
     await certCBRN.clickYesExamAccom();
     await certCBRN.clickNext();
-    await page.waitForLoadState('load');
-    await expect(certCBRN.examAccommLeftBar).toBeVisible();
-    });
+    await page.waitForLoadState('networkidle');
+
+    if (await certCBRN.mobileDropdown.isVisible()) {
+        // Mobile View: Check if the dropdown contains "Exam Accommodation"
+        const options = await certCBRN.mobileDropdown.locator('option').allTextContents();
+        expect(options).toContain('Exam Accommodation Request');
+        console.log("Mobile view: Verified 'Exam Accommodation' exists in dropdown.");
+    } else {
+        // Desktop View: Check if the left bar step is visible
+        await expect(certCBRN.examAccommLeftBar).toBeVisible();
+        console.log("Desktop view: Verified 'Exam Accommodation' is in left bar.");
+    }
+});
 
 certCBRNFixtures('expect next button hidden', async ({
     certCBRN,
     page
     }) => {
-        await page.pause();
     await expect(certCBRN.pagination).toContainText('Please complete all required fields');
     await expect(certCBRN.nextButton).toBeHidden();
     await certCBRN.fillOutExamInfo_CBRN();
@@ -175,13 +184,13 @@ certCBRNFixtures('side graphic matches header, has orange color', async ({
         await certCBRN.fillOutExamInfo_CBRN();
         await certCBRN.clickNext();
         //test assurance
-        await certCBRN.goToTestAssurance();
         await certCBRN.checkHeaderMatchesSidebar();
+        await certCBRN.clickNoTestAssurance();
+        await certCBRN.clickNext();
         //credential verification
-        await certCBRN.goToCredentialVerification();
         await certCBRN.checkHeaderMatchesSidebar();
+        await certCBRN.clickNext();
         //status
-        await certCBRN.goToStatus();
         await certCBRN.checkHeaderMatchesSidebar();
     });
 
@@ -405,20 +414,35 @@ certCBRNFixtures('grab checkout url, save to json', async ({
             await expect(certCBRN.workflowTitle).toContainText('Checkout and Make Payment');
     });
 //DO NOT RUN THIS NEXT TEST UNTIL WE HAVE A WAY TO UNDO THIS PROCESS
-    certCBRNFixtures.skip('successful case', async ({
+    certCBRNFixtures.skip('successful case, email message', async ({
         certCBRN,
         page,
-        homePage
+        homePage,
+        backOffice
         }) => {
+            const currentDate = new Date();
+
+            // Format the date and time as "MM/DD/YYYY HH:mm:ss"
+            const formattedDateTime = `${(currentDate.getMonth() + 1).toString().padStart(2, '0')}/` +  // Get month (1-12), pad with zero
+                                        `${currentDate.getDate().toString().padStart(2, '0')}/` +        // Get day (1-31), pad with zero
+                                        `${currentDate.getFullYear()} ` +                                 // Get full year (e.g., 2025)
+                                        `${currentDate.getHours().toString().padStart(2, '0')}:` +       // Get hours (00-23), pad with zero
+                                        `${currentDate.getMinutes().toString().padStart(2, '0')}:` +     // Get minutes (00-59), pad with zero
+                                        `${currentDate.getSeconds().toString().padStart(2, '0')}`;       // Get seconds (00-59), pad with zero
             await certCBRN.fillCardNumber('341111597242000');
             await certCBRN.fillCVV('1154');
             await certCBRN.selectMonth('12');
             await certCBRN.selectYear('2025');
             await certCBRN.submitCardDetails();
-            await page.waitForLoadState('load');
+            await page.waitForLoadState('networkidle');
 
             await homePage.visit();
             await expect(homePage.buttonCBRN).toContainText(/SCHEDULE\/MANAGE EXAM/i);
+            await backOffice.visitJohnetteAccount();
+            await backOffice.clickMessageSummaryTab();
 
+            //check status
+
+            await backOffice.checkEmailsVariable(formattedDateTime, 'BCEN Exam Eligibility Notification', 'Consolidated Receipt');
     });
   });

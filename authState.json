@@ -2,7 +2,7 @@
   "cookies": [
     {
       "name": "ASSOCIATIONANYWHEREAPEXSESSION",
-      "value": "ORA_WWV-Lbe1E467jIT66r2wcGelcpiu",
+      "value": "ORA_WWV-xEDqP6amGqMw7KQTkAgtiF8P",
       "domain": "online.bcen.org",
       "path": "/bcendevssa/",
       "expires": -1,
@@ -12,7 +12,7 @@
     },
     {
       "name": "ACGIAPEXSESSIONBACKOFFICE",
-      "value": "ORA_WWV-jrGrQeQnoA0HU3bvosWmA4n-",
+      "value": "ORA_WWV-0-F1MZnFWGbFJMVScSTXpZg-",
       "domain": "online.bcen.org",
       "path": "/bcendev/",
       "expires": -1,
@@ -35,7 +35,7 @@
       "value": "",
       "domain": "online.bcen.org",
       "path": "/bcendev",
-      "expires": 1739648555,
+      "expires": 1741195260,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
@@ -92,7 +92,7 @@
     },
     {
       "name": "ARRAffinity",
-      "value": "d1e1e3373fabf7fc1458b12fab8db25d2e27881092afe8b6154267802c94a3a3",
+      "value": "fcc597c279cb6b14e2e7c4d372fcceaea2ac1b16e2c82883f2471c249fb10f60",
       "domain": ".logindev.bcen.org",
       "path": "/",
       "expires": -1,
@@ -102,7 +102,7 @@
     },
     {
       "name": "ARRAffinitySameSite",
-      "value": "d1e1e3373fabf7fc1458b12fab8db25d2e27881092afe8b6154267802c94a3a3",
+      "value": "fcc597c279cb6b14e2e7c4d372fcceaea2ac1b16e2c82883f2471c249fb10f60",
       "domain": ".logindev.bcen.org",
       "path": "/",
       "expires": -1,
@@ -112,7 +112,7 @@
     },
     {
       "name": "idsrv.session",
-      "value": "46F96D38EC5AC4BD1EB7B95E0BBA4181",
+      "value": "8823B2470D3020CD21179EE01EB11B61",
       "domain": "logindev.bcen.org",
       "path": "/",
       "expires": -1,
@@ -122,7 +122,7 @@
     },
     {
       "name": "idsrv",
-      "value": "CfDJ8KQJ0Yba0v5Do3gWByQ6suDMDBy2BWjADWduRyw69NEF5SLhxND26rh-Rk7rLAqaF93FvY75kJeM3sK9J6sxnM5hvsLaTIAvTFHG9WiRYZhpRkbQD1EoIn9jfgwBIg6EXvWYVpslXVOWh6f6VHvMNiYJSMZ2VYNUCCI1OPQjl1su5etiCW-PBfk5N0vM1TUhGHMqG3aijs68cDJ2SBkBeG-zUWSnvPpZJk9MM2bqoG5B799WZNkooMYmCB6i3QUgvFnLFkvkyMnZWrBVnfLAw-LDmQUooidRZGGJtnS17ns4jhtw4Cw7qbVfcKkWHbAUZRh8hRVpH1wbHjm92D6ZCwJodm_eJHeuvmBrVwv8ai8KE8LN1lqjmGqHZckRMxm1cwL0fTiPUYxx9lbKp7D6NhZbT6w4VFw5zxU4IIEd_C_vF-D1MhcSLrVf-t9zggjhUuuPmqoDFuVLsBsU5edfdU5eLMp1_48-fglRolOxaizJIOkHzmkSjur7zQ8XZwohMKp3JjNwrqjX1a5a1T3GCNTZnu0oXLAkTDAvjWUJRvbe",
+      "value": "CfDJ8KQJ0Yba0v5Do3gWByQ6suB9UL6re3b7l7f4VXnpLD_4Dp_iGtsa-YJmUeh5ROgB3w1I0itcrHFYiyLkEjXUZfyB31hK4saiq_UL4AJmyu_3_FFwp8jhsOXD7-qJ43NZa_VYHE5-nFczMAxacgwxw4Y_gaMn3S8nt5-6_z84_iomGrzMcaYr-ZT-QFqp6jGxtnTqJQJzqTVj1mBlQSOXJrg4f-9t2xhtecI2j9hZFlsO4d-LQOewXcTx9ZEoSxGKzcOeWipEMENRtbsveIBYxdfgY53ahc4tDEbOtQTS4XhGr-NFzNpvzlLkBEG600FIZgfSP1D_feZsoEDwzzNCLn1I5hNJGmmaSPKIp0jNVcRJmKXbtd6VObG9sqQI6H8FP75Z5OOUZ3vXM-pkbL26tmvIl8n9_xSzfpEkWJDBEVClQtMnnLAmhcLWNEiQA4ZrnWJ5zq_Y6tziL_65vu4O9fmcvVzqxTEjXgG1Plnz2KeleO4I0eSXVclNEu-VW6wvRom1iIxmY3-KgaFhMJDLeMM_IUTYfdJq5Zi5hTutd42i",
       "domain": "logindev.bcen.org",
       "path": "/",
       "expires": -1,
@@ -192,7 +192,7 @@
     },
     {
       "name": "BREADCRUMB_SESSION_ID",
-      "value": "1748901",
+      "value": "1749112",
       "domain": ".bcen.org",
       "path": "/",
       "expires": -1,
@@ -202,11 +202,41 @@
     },
     {
       "name": "breadcrumb_session_id",
-      "value": "1748901",
+      "value": "1749112",
       "domain": ".bcen.org",
       "path": "/",
       "expires": -1,
       "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga",
+      "value": "GA1.2.1927345930.1738603277",
+      "domain": ".bcen.org",
+      "path": "/",
+      "expires": 1773163277.288496,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_gid",
+      "value": "GA1.2.1651624244.1738603277",
+      "domain": ".bcen.org",
+      "path": "/",
+      "expires": 1738689677,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_gat_gtag_UA_34484295_1",
+      "value": "1",
+      "domain": ".bcen.org",
+      "path": "/",
+      "expires": 1738603337,
+      "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     }
@@ -217,19 +247,19 @@
       "localStorage": [
         {
           "name": "_pendo_accountId.dfaece60-44a4-4fcc-40ef-a08918c334f7",
-          "value": "{\"ttl\":1745696558813,\"value\":\"BCENDEV\"}"
-        },
-        {
-          "name": "_pendo_meta.dfaece60-44a4-4fcc-40ef-a08918c334f7",
-          "value": "{\"ttl\":1745696552508,\"value\":1773185725}"
+          "value": "{\"ttl\":1747243264472,\"value\":\"BCENDEV\"}"
         },
         {
           "name": "_pendo_guides_blocked.dfaece60-44a4-4fcc-40ef-a08918c334f7",
-          "value": "{\"ttl\":1737070953477,\"value\":\"0\"}"
+          "value": "{\"ttl\":1738615513114,\"value\":\"0\"}"
+        },
+        {
+          "name": "_pendo_meta.dfaece60-44a4-4fcc-40ef-a08918c334f7",
+          "value": "{\"ttl\":1747241111861,\"value\":3609743382}"
         },
         {
           "name": "_pendo_visitorId.dfaece60-44a4-4fcc-40ef-a08918c334f7",
-          "value": "{\"ttl\":1745696558813,\"value\":\"DBROWN@BCENDEV\"}"
+          "value": "{\"ttl\":1747243264471,\"value\":\"DBROWN@BCENDEV\"}"
         }
       ]
     }
