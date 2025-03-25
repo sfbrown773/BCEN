@@ -1,4 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
+import { ReporterDescription } from '@playwright/test';
+
 
 /**
  * Read environment variables from file.
@@ -11,6 +13,7 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
+
 
 export default defineConfig({
   expect: {
@@ -27,11 +30,16 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   workers: 1,//process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: [
+    ['html'],
+    //['./readableReporter.ts'], // Pass the instantiated reporter
+  ],//'./readableReporter.ts',//'html'
+  //[["line"], ["allure-playwright"]],
+  //[["ortoni-report", reportConfig]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     launchOptions: {
-      slowMo: 300,
+      slowMo: 500,
     },
     headless: true,
     screenshot: 'only-on-failure', 
@@ -98,4 +106,5 @@ export default defineConfig({
   //   url: 'http://127.0.0.1:3000',
   //   reuseExistingServer: !process.env.CI,
   // },
+  
 });

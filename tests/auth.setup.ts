@@ -18,7 +18,7 @@ setup.describe('authenticated browser state', () => {
 setup('authenticate', async ({ page }) => {
   await backOffice.visit();
   await backOffice.clickRecentsButton();
-  await backOffice.clickJohnetteAccount();
+  await backOffice.clickUserAccount();
 
   const [popup] = await Promise.all([
     page.waitForEvent('popup'),

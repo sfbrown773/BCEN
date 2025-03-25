@@ -44,21 +44,20 @@ import { HomePage } from "../pages/home.page";
         await homePage.removeSubmittal('CEN');
       await certCen.visitCEN();
       await certCen.fillOutExamInfo_CEN();
-      await certCen.clickNext();
+      await certCen.clickNext(page);
       });
       
         test('yes military, no member, yes assurance', async ({ page }) => {
 
         const certCen = new Flow(page);
           await certCen.clickYesTestAssurance();
-          await certCen.clickNext();
+          await certCen.clickNext(page);
           // Move to Credential Verification
-          await certCen.clickNext();
+          await certCen.clickNext(page);
           // Move to Status
 
           await page.waitForLoadState('load');
           await page.waitForTimeout(500)
-          await page.pause();
           await certCen.clickCheckoutButton();
           await page.waitForLoadState('load');
           // Move to checkout
@@ -72,12 +71,11 @@ import { HomePage } from "../pages/home.page";
         test('yes military, no member, no assurance', async ({ page }) => {
             const certCen = new Flow(page);
           await certCen.clickNoTestAssurance();
-          await certCen.clickNext();
+          await certCen.clickNext(page);
           // Move to Credential Verification
-          await certCen.clickNext();
+          await certCen.clickNext(page);
           await page.waitForLoadState('load');
           // Move to Status
-          await page.pause();
           await certCen.clickCheckoutButton();
           await page.waitForLoadState('load');
           // Move to checkout

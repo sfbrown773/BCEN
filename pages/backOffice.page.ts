@@ -1,28 +1,36 @@
-import { stat } from "fs";
 import { AppPage } from "./page.holder";
 import { expect } from "@playwright/test";
-import { HomePage } from "./home.page";
+import dotenv from 'dotenv';
+
+dotenv.config(); // Load environment variables from .env
 
 export class BackOffice extends AppPage {
     public pagePath = '/'
     public logoutDropdown = this.page.locator('#n2-user-menu-button')
     public recentsButton = this.page.locator('#toggle-recents-menu')
     public johnetteAccount = this.page.getByRole('link', { name: 'badge Johnette K Bennage' });
+    public jaredAccount = this.page.getByRole('link', { name: 'badge Jared TEST' });
     public fernandoAccount = this.page.getByRole('link', { name: 'badge Fernando Antonio Chila' });
+    public jenniferAccount = this.page.getByRole('link', { name: 'badge Jennifer Morgan Perry' });
     //here we go to a different page, so this should technically be a different page
     public loginAsCust = this.page.getByText('Login as this Customer');
     public myAccount = this.page.getByText('My Account');
     
     
-   async visit(){
-    await this.page.goto('https://dbrown:Catalyst1@online.bcen.org/bcendev/home', {
-        waitUntil: 'load', // Wait until network activity has stopped
-      })
-   }
+    async visit() {
+        const encodedCredentials = Buffer.from(`${process.env.AA_BACKOFFICE_USERNAME}:${process.env.AA_BACKOFFICE_PASSWORD}`).toString('base64');
+        await this.page.setExtraHTTPHeaders({
+          'Authorization': `Basic ${encodedCredentials}`
+        });
+        
+        await this.page.goto(process.env.AA_BACKOFFICE_URL!);
+    }
 
-   async visitJohnetteAccount() {
-    await this.page.goto('https://dbrown:Catalyst1@https://online.bcen.org/bcendev/cencustmast.master_pg?q_cust_id=105307&p_app_context=CEN&p_view_menu_id=')
-   }
+   async visitUserAccount() {
+    await this.visit();
+    await this.clickRecentsButton();
+    await this.clickUserAccount();
+}
 
    async clickRecentsButton(){
         await this.recentsButton.click()
@@ -32,12 +40,9 @@ export class BackOffice extends AppPage {
         await this.loginAsCust.click();
     }
 
-    async clickJohnetteAccount(){
-        await this.johnetteAccount.click()
-    }
-
-    async clickFernandoAccount(){
-        await this.fernandoAccount.click()
+    async clickUserAccount(){
+        await this.jenniferAccount.click()
+        //Jennifer, Jared, Johnette, Fernando
     }
 
     async clickMyAccount(){
@@ -46,24 +51,6 @@ export class BackOffice extends AppPage {
 
     async setUsernameFilled(email:string){
        // await this.userName.type(email);
-    }  
-    async removeSubmittal() {
-    // Launch the browser and create a new page
-    const thisUrl = this.page.url();
-    // Use a regular expression to find two sequences of exactly six digits
-    const match = thisUrl.match(/(\d{6})\D+(\d{6})/);
-    console.log(match);
-
-    if (match) {
-    const submittalNum = match[1];
-    const workflowNum = match[2];
-    console.log(`Submittal Number: ${submittalNum}`);
-    console.log(`Workflow Number: ${workflowNum}`);
-    await this.page.goto(`https://online.bcen.org/bcendevssa/acgiapps.cf_remove_submittal?p_submittal_serno=${submittalNum}&p_wkf_serno=${workflowNum}`);
-    await expect(this.page.locator('body')).toHaveText(`Submittal ${submittalNum} Removed`);
-    } else {
-    console.log('No matching sequences of six numbers found in the URL.');
-    }
     }
 
     async getSubmitAndWorkNums(flow: string) {
@@ -109,21 +96,21 @@ export class BackOffice extends AppPage {
         }
     return { submittalNum, workflowNum };
 }
-async checkAppStatus(status:string, flow:string) {
+async checkAppStatus(status:string, flow:string, submittalNum) {
 
-const {submittalNum, workflowNum} = await this.getSubmitAndWorkNums(flow);
 if (submittalNum) { // Make sure submittalNum is defined before proceeding
     await this.visit();
     await this.clickRecentsButton();
-    await this.clickJohnetteAccount();
+    await this.clickUserAccount();
     const frame = await this.page.frameLocator('iframe').first();
-    const cellInRow = await frame.getByText(submittalNum);
-    const row = await cellInRow.locator('xpath=ancestor::tr'); // Use XPath to find the <tr> ancestor
-    // Find the cell in the same row that contains "Military_Review"
-    const statusCell = await row.locator('td', { hasText: status });
+    const cellInRow = await frame.getByText(submittalNum).first();
+    const row = await cellInRow.locator('xpath=ancestor::tr');
+    const statusCell = await row.locator('td', { hasText: new RegExp(`^${status}$`) });
+    await frame.getByRole('link', { name: 'Application Created On' }).click();
+    await frame.getByRole('button', { name: '' }).click();
+    await statusCell.waitFor({ state: 'visible' });
     // Highlight in red
     //await statusCell.evaluate(node => node.style.border = '3px solid red');
-    // Assert that the status cell contains the correct text
     await expect(statusCell).toContainText(status);
 } else {
     console.log('submittalNum not found');
@@ -131,9 +118,15 @@ if (submittalNum) { // Make sure submittalNum is defined before proceeding
 }
 
 async goToSubmittalInBO(flow:string) {
+    const username = process.env.USERNAME;
+    const password = process.env.PASSWORD;
+
+    if (!username || !password) {
+        throw new Error("Missing credentials in environment variables");
+    }
     const {submittalNum, workflowNum} = await this.getSubmitAndWorkNums(flow);
     if (submittalNum && workflowNum) {
-        await this.page.goto(`https://dbrown:Catalyst1@online.bcen.org/bcendev/sbmssamysubmittals.review_page?p_submittal_serno=${submittalNum}&p_wkf_serno=${workflowNum}`);
+        await this.page.goto(`https://${username}:${password}@online.bcen.org/bcendev/sbmssamysubmittals.review_page?p_submittal_serno=${submittalNum}&p_wkf_serno=${workflowNum}`);
         return { submittalNum, workflowNum };
     } else {
         console.log('Submittal or workflow number is undefined.');
@@ -143,44 +136,10 @@ async goToSubmittalInBO(flow:string) {
 async clickMessageSummaryTab() {
     await this.page.getByRole('link', { name: 'Message Summary', exact: true }).click();
 }
-async checkEmails(emailTitle1:string, emailTitle2:string, date: string) {
-    await this.visit();
-    await this.clickRecentsButton();
-    await this.clickJohnetteAccount();
-    await this.page.getByRole('link', { name: 'Message Summary', exact: true }).click();
-    await this.page.waitForLoadState('networkidle');
-
-    for (let i = 0; i < 30; i++) {  // Retry 30 times, waiting 5 seconds between each
-        const cellText = await this.page.locator('table.aaTabularTable tbody tr').first().locator('td').nth(1).textContent();
-            console.log(`Attempt ${i + 1}:`, cellText);
-        
-            if (cellText !== null && cellText > date) {
-                    const firstText = await this.page.locator('table.aaTabularTable tbody tr').first().locator('td').nth(5).textContent();
-                    const secondText = await this.page.locator('table.aaTabularTable tbody tr').nth(1).locator('td').nth(5).textContent();
-                    console.log(firstText, secondText);
-                    
-                    // Check either/or condition
-                    if (firstText?.includes(emailTitle1) && secondText?.includes(emailTitle2)) {
-                        await expect(this.page.locator('table.aaTabularTable tbody tr').first().locator('td').nth(5)).toContainText(emailTitle1);
-                        await expect(this.page.locator('table.aaTabularTable tbody tr').nth(1).locator('td').nth(5)).toContainText(emailTitle2);
-                        break;
-                    } else if (firstText?.includes(emailTitle2) && secondText?.includes(emailTitle1)) {
-                        await expect(this.page.locator('table.aaTabularTable tbody tr').first().locator('td').nth(5)).toContainText(emailTitle2);
-                        await expect(this.page.locator('table.aaTabularTable tbody tr').nth(1).locator('td').nth(5)).toContainText(emailTitle1);
-                        break;
-                    } else {
-                        // If neither condition is met, log an error or fail the test
-                        throw new Error('The texts in the two cells do not match the expected conditions.');
-                    }
-            }
-            await this.page.waitForTimeout(5000); // Wait 5 seconds before retrying
-            await this.page.reload();
-      }
-}
 async checkEmailsVariable(date:string, ...emailTitles: string[]) {
     await this.visit();
     await this.clickRecentsButton();
-    await this.clickJohnetteAccount();
+    await this.clickUserAccount();
     await this.page.getByRole('link', { name: 'Message Summary', exact: true }).click();
     await this.page.waitForLoadState('networkidle');
 
@@ -238,7 +197,7 @@ async checkEmailsVariable(date:string, ...emailTitles: string[]) {
 async getCurrentDate() {
     const currentDate = new Date();
     currentDate.setHours(currentDate.getHours() - 8);
-    currentDate.setMinutes(currentDate.getMinutes() - 1);
+    currentDate.setMinutes(currentDate.getMinutes() - 2);
 
     // Format the date and time as "MM/DD/YYYY HH:mm:ss"
     const formattedDateTime = `${(currentDate.getMonth() + 1).toString().padStart(2, '0')}/` +  // Get month (1-12), pad with zero
@@ -290,5 +249,140 @@ async reviewAccom(choice:string, flow:string) {
     }
     await this.page.waitForLoadState('networkidle');
 }
+async updateExamStatus(flow:string, status:string) {
+    //locator(#aaVerticalLinks ul li).getByText
+    const frame = this.page.locator('#iframe_51000001261');
+    const possibleOverrideLink = this.page.locator('#aaVerticalLinks').getByText('OVERRIDE USE WITH CAUTION Continue > Exam Authorized')
+    //await frame.getByRole('link', { name: 'Staff - Exam Authorization (Limited' }).evaluate(node => node.style.border = '3px solid red');
+    if (await possibleOverrideLink.isVisible()){
+        possibleOverrideLink.click();
+    }
+    //frame.contentFrame()
+    await this.page.getByRole('link', { name: 'Staff - Exam Authorization (' }).click({delay:70});//
+    await this.page.waitForLoadState('load');
+    await this.page.getByRole('link', { name: 'Edit' }).click();
+    await this.page.waitForLoadState('load');
+    //await this.page.locator('#P2100_LEVEL1').selectOption(flow);//
+    const resultCode = this.page.getByLabel('Result Code');//
+    const psiCode = this.page.getByLabel('PSI Status');//
+    const psiMessage = this.page.locator('#aaAttrty_PSIMESSAGE textarea');
+    await psiMessage.fill('');
+    if (status === 'P') {
+        await resultCode.fill('P');
+        await psiCode.fill('PASSED');
+    } else if (status === 'F') {
+        await resultCode.fill('F');
+        await psiCode.fill('FAILURE');
 
+    } else {
+        throw new Error('Enter either F or P.');
+    }
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const mm = String(tomorrow.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const dd = String(tomorrow.getDate()).padStart(2, '0');
+    const yyyy = tomorrow.getFullYear();
+    const formattedDate = `${mm}/${dd}/${yyyy}`
+    await this.page.getByLabel('End Date').fill(formattedDate);//
+    await this.page.getByRole('button', { name: 'Save' }).click();//
+
+    if ( status === 'P') {
+        await this.page.getByRole('link', { name: 'Staff > Certified' }).click();//
+    } else if ( status === 'F' ) {
+        await this.page.getByRole('link', { name: 'Staff > Failed' }).click();//
+    } else {
+        throw Error
+    }
+    await this.page.waitForLoadState('networkidle');
+}
+
+async revertCertifiedToNewApp() {
+    await this.page.getByRole('link', { name: 'Certifications Held' }).click();
+  await this.page.locator('#iframe_51000000365').contentFrame().getByRole('link', { name: 'Details' }).nth(1).click();
+  await this.page.locator('#iframe_51000000365').contentFrame().getByRole('row', { name: 'Update Certified 02/11/2025' }).getByRole('link').click();
+  await this.page.goto('https://online.bcen.org/bcendev/crtwebapp.update_cert?p_cust_id=105307&p_cert_ty=CBRN&p_spec_ty=CBRN&p_level_id=CERTIFIED&p_period_serno=847122');
+  await this.page.getByRole('link', { name: 'Apply For a New Certificate' }).click();
+  await this.page.locator('#section-header').click();
+  await this.page.getByRole('link', { name: 'Certified Burn Registered' }).click();
+  await this.page.locator('#selLDS_chzn_o_2').click();
+  await this.page.getByRole('link', { name: 'Certified Burn Registered' }).click();
+  //await page.locator('#selLDS_chzn_o_6').click(); THIS IS TO RETIRE
+  await this.page.getByRole('button', { name: 'Continue' }).click();
+  await this.page.getByRole('button', { name: 'Submit' }).click();
+}
+
+async convertFailedToSecondApp(submittalNum:string, workflowNum:string) {
+
+    const encodedCredentials = Buffer.from(`${process.env.AA_BACKOFFICE_USERNAME}:${process.env.AA_BACKOFFICE_PASSWORD}`).toString('base64');
+    await this.page.setExtraHTTPHeaders({
+      'Authorization': `Basic ${encodedCredentials}`
+    });
+    
+    await this.page.goto(process.env.AA_BACKOFFICE_URL! + `/sbmssamysubmittals.review_page?p_submittal_serno=${submittalNum}&p_wkf_serno=${workflowNum}`);
+
+    
+
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    const formattedDate = threeMonthsAgo.toLocaleDateString('en-US');
+
+    await this.page.getByRole('link', { name: 'Staff - Application Information' }).click();
+    await this.page.getByRole('textbox', { name: 'Exam Fail Date' }).click();
+    await this.page.getByRole('textbox', { name: 'Exam Fail Date' }).fill(formattedDate);
+    await this.page.getByRole('button', { name: 'Save' }).click();
+    //await expect(page.locator('#ui-id-4')).toContainText('Updates Successful!');
+    await expect(this.page.locator('#ui-id-4 div').filter({ hasText: 'Updates Successful!' }).nth(1)).toBeVisible();
+}
+async revertFailedToNewApp(submittalNum:string, workflowNum:string) {
+    const username = process.env.USERNAME;
+    const password = process.env.PASSWORD;
+
+    if (!username || !password) {
+        throw new Error("Missing credentials in environment variables");
+    }
+
+    const twoYearsAgo = new Date();
+    twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+    const formattedDate = twoYearsAgo.toLocaleDateString('en-US');
+
+    await this.visitUserAccount();
+    await this.page.goto(`https://${username}:${password}@online.bcen.org/bcendev/sbmssamysubmittals.review_page?p_submittal_serno=${submittalNum}&p_wkf_serno=${workflowNum}`);
+    await this.page.getByRole('link', { name: 'Staff - Application Information' }).click();
+    await this.page.getByRole('textbox', { name: 'Exam Fail Date' }).click();
+    await this.page.getByRole('textbox', { name: 'Exam Fail Date' }).fill(formattedDate);
+    await this.page.getByRole('button', { name: 'Save' }).click();
+    //await expect(page.locator('#ui-id-4')).toContainText('Updates Successful!');
+    await expect(this.page.locator('#ui-id-4 div').filter({ hasText: 'Updates Successful!' }).nth(1)).toBeVisible();
+}
+async setToRetired() {
+    await this.visitUserAccount();
+        await this.page.getByRole('link', { name: 'Certifications Held' }).click();
+        const iframe = await this.page.locator('#iframe_51000000365').contentFrame();
+
+        // Find the cell that contains the text 'Certified Burn Registered Nurse (CBRN)'
+        const cbrnCell = iframe.locator('td', { hasText: 'Certified Burn Registered Nurse (CBRN)' });
+        await cbrnCell.evaluate(node => node.style.border = '3px solid red');
+
+        // Traverse to the sibling element with the role 'link' and name 'Details'
+        const detailsLink = cbrnCell.locator('xpath=preceding-sibling::td//a[text()="Details"]');
+        await detailsLink.evaluate(node => node.style.border = '3px solid red');
+
+        // Click on the link (or perform other actions)
+        await detailsLink.click();
+        //await this.page.locator('#iframe_51000000365').contentFrame().getByRole('link', { name: 'Details' }).nth(1).click();
+
+        //CHANGE THIS
+        //await this.page.locator('#iframe_51000000365').contentFrame().getByLabel('Region = Current').getByRole('rowgroup').click();
+        const updateCell = this.page.locator('#iframe_51000000365').contentFrame().locator('td[headers="aaCRTCurrentAction"]');
+        await updateCell.evaluate(node => node.style.border = '3px solid red');
+        await updateCell.click();
+        await this.page.getByRole('link', { name: 'Apply For a New Certificate' }).click();
+        await this.page.getByRole('link', { name: 'Certified Burn Registered' }).click();
+        await this.page.getByRole('textbox').fill('Certified Burn Registered Nurse (CBRN) - Certified Burn Registered Nurse - Retired');
+        await this.page.getByRole('heading', { name: 'Certification Application' }).click();
+        
+        await this.page.getByRole('button', { name: 'Continue' }).click();
+        await this.page.getByRole('button', { name: 'Submit' }).click();
+}
 }

@@ -1,434 +1,750 @@
 import { certCTRNFixtures, expect } from "../fixtures/certCTRN.fixtures";
 import fs from 'fs';
+import path from "path";
 
-
-  certCTRNFixtures.beforeEach('wipe submittals', async ({
-    certCTRN,
-    page,
+certCTRNFixtures.describe('CTRN Suite', () => {
+  certCTRNFixtures.beforeEach('Wipe previous submittals and clear checkout', async ({
     homePage
     }) => {
-    await homePage.visit();
-        // Check if "Apply for Certification" text is present
-    await homePage.removeSubmittal('CTRN');
-    await certCTRN.visitCTRN();
+        await certCTRNFixtures.step('Check cart for items. If any, clear them.', async () => {
+            await homePage.clearCheckoutAtStart();
+            await homePage.visit();
+          });
+        await certCTRNFixtures.step('Check for open submittal. If exists, delete it.', async () => {
+            await homePage.removeSubmittal('CTRN');
+            await homePage.visitCTRN();
+        });
     });
-
-  //structure as an if-then. If the application isn't clean, then run the submittal-remover and then start the process again. Otherwise run the test.
-certCTRNFixtures('update home page label to in progress', async ({
-    certCTRN,
-    homePage,
-    page
-    }) => {
-    await certCTRN.fillOutExamInfo_CTRN();
-    await certCTRN.clickNext();
-    await page.waitForLoadState('networkidle');
-    await expect(certCTRN.workflowTitle).toHaveText('Test Assurance');
-    await homePage.visit();
-    await expect(homePage.buttonCTRN).toContainText(/In Process/i);
-    });
-
-certCTRNFixtures('update home page label to checkout', async ({
-    certCTRN,
-    homePage,
-    page
-    }) => {
-    await certCTRN.fillOutExamInfo_CTRN();
-    await certCTRN.clickNext();
-    await page.waitForLoadState('networkidle');
-    await expect(certCTRN.workflowTitle).toHaveText('Test Assurance');
-    await certCTRN.clickNoTestAssurance();
-    await certCTRN.clickNext();
-    await certCTRN.clickNext();
-    await certCTRN.clickCheckoutButton();
-    //the problem with this next step is a simple timeout issue due to load time.
-    await page.waitForLoadState('networkidle');
-    await expect(certCTRN.workflowTitle).toHaveText('Checkout and Make Payment');
-    //Checkout
-    await homePage.visit();
-    await expect(homePage.buttonCTRN).toContainText(/Checkout/i);
-    });
-
-certCTRNFixtures('update home page label to military documentation review', async ({
-    certCTRN,
-    homePage,
-    page
-    }) => {
-    await certCTRN.fillOutYesMil_CTRN();
-    await page.waitForLoadState('networkidle');
-    await expect(certCTRN.workflowTitle).toHaveText('Upload Military Documentation');
-    await certCTRN.fileInput.setInputFiles(certCTRN.filePath);
-    await page.waitForLoadState('networkidle');
-    await expect(certCTRN.uploadMessage).toContainText('successfully uploaded');
-    await certCTRN.clickNext();
-    await page.getByRole('link', { name: 'Advance to Military' }).click();
-    await expect(certCTRN.workflowTitle).toHaveText('Military Discount Instructions');
-    //Military Documentation Review
-    await homePage.visit();
-    await expect(homePage.buttonCTRN).toContainText(/Military Documentation Review/i);
-    });
-
-certCTRNFixtures('can remove uploaded files from military docs', async ({
-    certCTRN,
-    homePage,
-    page
-    }) => {
-    await certCTRN.fillOutYesMil_CTRN();
-    await page.waitForLoadState('load');
-    await expect(certCTRN.workflowTitle).toHaveText('Upload Military Documentation');
-    const path = require('path');
-    const filePath = path.resolve(__dirname, '../600.jpg');
-    const fileInput = certCTRN.fileInput;
-    await fileInput.setInputFiles(filePath);
-
-    const fileInput2 = certCTRN.fileInput2;
-    await fileInput2.setInputFiles(filePath);
-    await page.waitForLoadState('load');
-    await expect(certCTRN.uploadMessage).toContainText('successfully uploaded');
-    //delete and confirm delete
-    await certCTRN.deleteFile1.click();
-    await certCTRN.deleteFile2.click();
-    await expect(certCTRN.file1NoFile).toContainText(/No file chosen/);
-    await expect(certCTRN.file2NoFile).toContainText(/No file chosen/);
-    });
-
-certCTRNFixtures('can remove uploaded files from exam accommodation', async ({
-    certCTRN,
-    homePage,
-    page
-    }) => {
-    await certCTRN.fillOutYesAccom_CTRN();
-    await page.waitForLoadState('load');
-    await expect(certCTRN.workflowTitle).toHaveText('Exam Accommodation Request');
-    const path = require('path');
-    const filePath = path.resolve(__dirname, '../600.jpg');
-
-    await certCTRN.examAccommUpload.setInputFiles(filePath);
-    await page.waitForLoadState('load');
-    await expect(certCTRN.accomUploadMessage).toContainText('successfully uploaded');
-    await certCTRN.deleteExamAccom.click();
-    await expect(certCTRN.accomNoFile).toContainText(/No file chosen/);
-    });
-    
-certCTRNFixtures('yes exam accomodation, add step to left bar', async ({
-    certCTRN,
-    page
-    }) => {
-        await certCTRN.fillOutExamInfo_CTRN();
-        await certCTRN.clickYesExamAccom();
-        await certCTRN.clickNext();
-        await page.waitForLoadState('networkidle');
-    
-        if (await certCTRN.mobileDropdown.isVisible()) {
-            // Mobile View: Check if the dropdown contains "Exam Accommodation"
-            const options = await certCTRN.mobileDropdown.locator('option').allTextContents();
-            expect(options).toContain('Exam Accommodation Request');
-            console.log("Mobile view: Verified 'Exam Accommodation' exists in dropdown.");
-        } else {
-            // Desktop View: Check if the left bar step is visible
-            await expect(certCTRN.examAccommLeftBar).toBeVisible();
-            console.log("Desktop view: Verified 'Exam Accommodation' is in left bar.");
-        }
-    });
-
-certCTRNFixtures('expect next button hidden', async ({
-    certCTRN,
-    page
-    }) => {
-        await page.pause();
-    await expect(certCTRN.pagination).toContainText('Please complete all required fields');
-    await expect(certCTRN.nextButton).toBeHidden();
-    await certCTRN.fillOutExamInfo_CTRN();
-    await certCTRN.checkBoxesOneByOne();
-});
-
-certCTRNFixtures('test assurance error message', async ({
-    certCTRN,
-    page
-    }) => {
-    await certCTRN.fillOutExamInfo_CTRN();
-    await certCTRN.clickNext();
-    await certCTRN.nextButton.click();
-    await expect(certCTRN.assuranceError).toHaveText('"Would you like to purchase test assurance?" is required.');
-});
-
-certCTRNFixtures('error messages on exam information', async ({
-    certCTRN,
-    page
-    }) => {
-        await certCTRN.fillOutExamInfo_CTRN();
-        await certCTRN.licenseNumber.fill('');
-        await certCTRN.selectState('Select One');
-        await certCTRN.expirationDate.fill('');
-        await certCTRN.selectMembershipASTNA('Select One');
-        await certCTRN.clickNoMilDiscount();
-        await expect(certCTRN.rnLicenseError).toBeVisible();
-        await expect(certCTRN.rnStateError).toBeVisible();
-        await expect(certCTRN.expirationError).toBeVisible();
-        await expect(certCTRN.astnaMemberError).toBeVisible();
-    });
-
-certCTRNFixtures('toggle membership - memberNumber input opens and closes', async ({
-    certCTRN,
-    page
-    }) => {
-        await certCTRN.toggleMembershipASTNA();
-        await certCTRN.toggleMembershipASTNA();
-});
-
-certCTRNFixtures('side graphic matches header, has orange color', async ({
-    certCTRN,
-    page
-    }) => {
-        await page.waitForLoadState('load');
-        //exam info
-        await certCTRN.checkHeaderMatchesSidebar();
-        await certCTRN.fillOutExamInfo_CTRN();
-        await certCTRN.clickNext();
-        //test assurance
-        await certCTRN.checkHeaderMatchesSidebar();
-        await certCTRN.clickNoTestAssurance();
-        await certCTRN.clickNext();
-        //credential verification
-        await certCTRN.checkHeaderMatchesSidebar();
-        await certCTRN.clickNext();
-        //status
-        await certCTRN.checkHeaderMatchesSidebar();
-    });
-
-  certCTRNFixtures.describe('no member', () => {
-    certCTRNFixtures.beforeEach('no member', async ({
-        certCTRN
+certCTRNFixtures.describe.only('SSA messages', () => { 
+    certCTRNFixtures.beforeEach('Start application, fill out exam info', async ({
+        ctrnExamInfo,
+        ctrnTestAssurance,
+        page
         }) => {
-            await certCTRN.fillOutExamInfo_CTRN();
-            await certCTRN.selectMembershipASTNA('No');
-    
-            await certCTRN.clickNext();
+            const examInfoArgs = {
+                accommodationRequest: false,
+                militaryStatusRequest: false,
+                licenseNumber: '1234',
+                state: 'IL',
+                membership: 'No'
+            }
+            await ctrnExamInfo.setTestAnnotations(certCTRNFixtures.info(), examInfoArgs);
+           
+            await certCTRNFixtures.step('Fill out page one, Exam Information', async () => {
+                await ctrnExamInfo.fillOutExamInfo_CTRN(examInfoArgs);
+            });
+            await certCTRNFixtures.step('Click next, move ahead to Test Assurance', async () => {
+                await ctrnExamInfo.clickNext(page);
+                await page.waitForLoadState('networkidle');
+                await ctrnTestAssurance.checkWorkflowTitle('Test Assurance');
+            });
         });
 
-        certCTRNFixtures('not member, yes assurance', async ({
-            certCTRN,
+    certCTRNFixtures('Confirm SSA Message of in progress', async ({
+        homePage
+        }) => { 
+        await certCTRNFixtures.step('Go to homepage, and check the SSA Message. Should be \'In Progress.\'', async () => {
+            await homePage.visit();
+            await expect(homePage.buttonCTRN).toContainText(/In Process/i);
+        });
+        });
+
+    certCTRNFixtures('Continue application and confirm SSA Message of checkout', async ({
+        ctrnTestAssurance,
+        ctrnCredVerification,
+        ctrnStatus,
+        ctrnCheckout,
+        homePage,
+        page
+        }) => { 
+        await certCTRNFixtures.step('Click no test assurance, move to Credential Verification page', async () => {
+            await ctrnTestAssurance.selectTestAssurance(false);
+            await ctrnTestAssurance.clickNext(page);
+        });
+
+        await certCTRNFixtures.step('Move to Status page', async () => {
+            await ctrnCredVerification.clickNext(page);
+        });
+        await certCTRNFixtures.step('Move to Checkout page', async () => {
+            await ctrnStatus.clickCheckoutButton();
+            await page.waitForLoadState('networkidle');
+            await ctrnCheckout.checkWorkflowTitle('Checkout and Make Payment');
+        });
+        await certCTRNFixtures.step('Go to homepage, and check the SSA Message. Should be \'Checkout.\'', async () => {
+            await homePage.visit();
+            await expect(homePage.buttonCTRN).toContainText(/Checkout/i);
+            });
+        });
+});
+
+
+certCTRNFixtures.describe('Military documentation review', () => {
+    certCTRNFixtures.beforeEach('Start application with military discount', async ({
+        ctrnExamInfo,
+        ctrnMilitaryDoc,
+        page
+        }) => {
+            const examInfoArgs = {
+                accommodationRequest: false,
+                militaryStatusRequest: true,
+                licenseNumber: '1234',
+                state: 'IL',
+                membership: 'No'
+            }
+        await ctrnExamInfo.setTestAnnotations(certCTRNFixtures.info(), examInfoArgs);
+
+        await certCTRNFixtures.step('Fill out exam information, selecting yes for military discount', async () => {
+            await ctrnExamInfo.fillOutExamInfo_CTRN(examInfoArgs);
+            await ctrnExamInfo.clickNext(page);
+            await page.waitForLoadState('networkidle');
+            await ctrnMilitaryDoc.checkWorkflowTitle('Upload Military Documentation');
+        });
+        });
+    certCTRNFixtures('Begin application and confirm SSA Message of military documentation review', async ({
+        ctrnExamInfo,
+        ctrnMilitaryDoc,
+        homePage,
+        page
+        }) => {
+
+        await certCTRNFixtures.step('Upload test document for review', async () => {
+            const path = require('path');
+            const filePath = path.resolve(__dirname, '../600.jpg');
+            await ctrnMilitaryDoc.uploadMilDoc(filePath);
+        });
+        await certCTRNFixtures.step('Navigate to end of Military Documentation Review flow', async () => {
+            await ctrnMilitaryDoc.clickNext(page);
+            await ctrnMilitaryDoc.clickAdvanceToMilitary();
+            await ctrnMilitaryDoc.checkWorkflowTitle('Military Discount Instructions');
+        });
+        
+        await certCTRNFixtures.step('Go to homepage, and check the SSA Message. Should be \'Military Documentation Review.\'', async () => {
+        });
+            await homePage.visit();
+            await expect(homePage.buttonCTRN).toContainText(/Military Documentation Review/i);
+        });
+
+    certCTRNFixtures('Can remove uploaded files from military docs', async ({
+        ctrnMilitaryDoc,
+        homePage,
+        page
+        }) => {
+        await certCTRNFixtures.step('Upload test files to both inputs', async () => {
+            const path = require('path');
+            const filePath = path.resolve(__dirname, '../600.jpg');
+            await ctrnMilitaryDoc.uploadMilDoc(filePath);
+            await ctrnMilitaryDoc.uploadMilDoc2(filePath);
+        });
+
+        await certCTRNFixtures.step('Delete both uploaded files and confirm delete', async () => {
+            await ctrnMilitaryDoc.deleteMilUpload1();
+            await ctrnMilitaryDoc.deleteMilUpload2();
+            await expect(ctrnMilitaryDoc.file1NoFile).toContainText(/No file chosen/);
+            await expect(ctrnMilitaryDoc.file2NoFile).toContainText(/No file chosen/);
+        });
+        });
+});
+
+
+certCTRNFixtures.describe('Exam accommodation review', () => {
+    certCTRNFixtures.beforeEach('Start application with exam accommodation', async ({
+        ctrnExamInfo,
+        ctrnExamAccommodations,
+        page
+        }) => {
+
+            const examInfoArgs = {
+                accommodationRequest: true,
+                militaryStatusRequest: false,
+                licenseNumber: '1234',
+                state: 'IL',
+                membership: 'No'
+            }
+         await ctrnExamInfo.setTestAnnotations(certCTRNFixtures.info(), examInfoArgs);
+
+            await certCTRNFixtures.step('Fill out exam information, requesting accommodations on the exam', async () => {
+                await ctrnExamInfo.fillOutExamInfo_CTRN(examInfoArgs);
+                await ctrnExamInfo.clickNext(page);
+                await page.waitForLoadState('networkidle');
+                await ctrnExamAccommodations.checkWorkflowTitle('Exam Accommodation Request');
+            });
+        });
+    certCTRNFixtures('Can remove uploaded files from exam accommodation', async ({
+        ctrnExamAccommodations,
+        homePage,
+        page
+        }) => {
+        await certCTRNFixtures.step('Upload test documentation for exam accommodation review', async () => {
+            const path = require('path');
+            const filePath = path.resolve(__dirname, '../600.jpg');
+    
+            await ctrnExamAccommodations.uploadExamAccomDoc(filePath);
+            await page.waitForLoadState('load');
+        });
+        await certCTRNFixtures.step('Delete test document. Confirm deletion', async () => {
+            await ctrnExamAccommodations.deleteFile1.click();
+            await expect(ctrnExamAccommodations.errorMessageNoFile).toContainText(/No file chosen/);
+        });
+        });
+        
+    certCTRNFixtures('Yes exam accomodation, add step to left bar', async ({
+        ctrnExamAccommodations
+        }) => {
+
+        await certCTRNFixtures.step('Confirm that \'Exam Accommodation\' is added to flow graphics in both desktop and mobile views', async () => {
+            if (await ctrnExamAccommodations.mobileDropdown.isVisible()) {
+                // Mobile View: Check if the dropdown contains "Exam Accommodation"
+                const options = await ctrnExamAccommodations.mobileDropdown.locator('option').allTextContents();
+                expect(options).toContain('Exam Accommodation Request');
+                console.log("Mobile view: Verified 'Exam Accommodation' exists in dropdown.");
+            } else {
+                // Desktop View: Check if the left bar step is visible
+                await expect(ctrnExamAccommodations.examAccommodationsLeftBar).toBeVisible();
+                console.log("Desktop view: Verified 'Exam Accommodation' is in left bar.");
+            }
+        });
+    });
+});
+
+certCTRNFixtures('Expect next button hidden', async ({
+    ctrnExamInfo,
+    page
+    }) => {
+
+    const examInfoArgs = {
+        accommodationRequest: false,
+        militaryStatusRequest: false,
+        licenseNumber: '1234',
+        state: 'IL',
+        membership: 'No'
+    }
+    await ctrnExamInfo.setTestAnnotations(certCTRNFixtures.info(), examInfoArgs);
+
+    await certCTRNFixtures.step('When form is not filled, check that bottom text says \'Please complete all required fields,\' and that Next button is hidden.', async () => {
+        await expect(ctrnExamInfo.pagination).toContainText('Please complete all required fields');
+        await expect(ctrnExamInfo.nextButton).toBeHidden();
+    });
+    await certCTRNFixtures.step('Check that next button appears and disappears when form elements are checked and unchecked', async () => {
+        await ctrnExamInfo.fillOutExamInfo_CTRN(examInfoArgs);
+        await ctrnExamInfo.checkBoxesOneByOne();
+    });
+});
+
+certCTRNFixtures('Test assurance error message', async ({
+    ctrnExamInfo,
+    ctrnTestAssurance
+    }) => {
+
+    const examInfoArgs = {
+        accommodationRequest: false,
+        militaryStatusRequest: true,
+        licenseNumber: '1234',
+        state: 'IL',
+        membership: 'No'
+    }
+    await ctrnExamInfo.setTestAnnotations(certCTRNFixtures.info(), examInfoArgs);
+
+    await certCTRNFixtures.step('Navigate to Test Assurance step', async () => {
+        await ctrnExamInfo.fillOutExamInfo_CTRN(examInfoArgs);
+        await ctrnExamInfo.clickNext(page);
+    });
+    await certCTRNFixtures.step('Attempt to click next, successfully triggering error message', async () => {
+        await ctrnTestAssurance.clickNext(page);
+        await expect(ctrnTestAssurance.assuranceError).toHaveText('"Would you like to purchase test assurance?" is required.');
+    });
+});
+
+certCTRNFixtures('Error messages on exam information', async ({
+    ctrnExamInfo,
+    page
+    }) => {
+
+        const examInfoArgs = {
+            accommodationRequest: null,
+            militaryStatusRequest: null,
+            licenseNumber: '',
+            state: 'Select One',
+            membership: 'Select One'
+        }
+        await ctrnExamInfo.setTestAnnotations(certCTRNFixtures.info(), examInfoArgs);
+
+        await certCTRNFixtures.step('Check that all error messages are triggered on Exam Information page', async () => {
+            //Must interact with Exam Info elements before errors show. Thus, fillOutExamInfo as shown, and then delete those values in checkErrorMessages
+            await ctrnExamInfo.fillOutExamInfo_CTRN({
+                accommodationRequest: false,
+                militaryStatusRequest: false,
+                licenseNumber: '1234',
+                state: 'IL',
+                membership: 'No'
+            });
+            await ctrnExamInfo.checkErrorMessages();
+        });
+    });
+
+certCTRNFixtures('Toggle membership - memberNumber input opens and closes', async ({
+    ctrnExamInfo
+    }) => {
+        const examInfoArgs = {
+            accommodationRequest: null,
+            militaryStatusRequest: null,
+            licenseNumber: null,
+            state: null,
+            membership: 'Toggle between membership statuses'
+        }
+        await ctrnExamInfo.setTestAnnotations(certCTRNFixtures.info(), examInfoArgs);
+
+        await certCTRNFixtures.step('Select not a member, expect member number input to be hidden. Select member, expect member number input to be visible', async () => {
+            await ctrnExamInfo.toggleMembership();
+            await ctrnExamInfo.toggleMembership();
+        });
+});
+
+certCTRNFixtures('Side graphic matches header, has orange color', async ({
+    ctrnExamInfo,
+    ctrnTestAssurance,
+    ctrnCredVerification,
+    ctrnStatus,
+    page
+    }) => {
+        const examInfoArgs = {
+            accommodationRequest: false,
+            militaryStatusRequest: false,
+            licenseNumber: '1234',
+            state: 'IL',
+            membership: 'No'
+        }
+        const testAssuranceArgs = false
+        await ctrnExamInfo.setTestAnnotations(certCTRNFixtures.info(), examInfoArgs, testAssuranceArgs);
+
+        await certCTRNFixtures.step('Check graphic on Exam Information page', async () => {
+            await ctrnExamInfo.checkHeaderMatchesSidebar();
+            await ctrnExamInfo.fillOutExamInfo_CTRN(examInfoArgs);
+            await ctrnExamInfo.clickNext(page);
+        });
+        await certCTRNFixtures.step('Check graphic on Test Assurance page', async () => {
+            await ctrnTestAssurance.checkHeaderMatchesSidebar();
+            await ctrnTestAssurance.selectTestAssurance(testAssuranceArgs);
+            await ctrnTestAssurance.clickNext(page);
+        });
+        await certCTRNFixtures.step('Check graphic on Credential Verification page', async () => {
+            await ctrnCredVerification.checkHeaderMatchesSidebar();
+            await ctrnCredVerification.clickNext(page);
+        });
+        await certCTRNFixtures.step('Check graphic on Status page', async () => {
+            await ctrnStatus.checkHeaderMatchesSidebar();
+        });
+    });
+
+  certCTRNFixtures.describe('Price checks for non-members of other societies', () => {
+    certCTRNFixtures.beforeEach('Fill out exam info for non-member', async ({
+        ctrnExamInfo
+        }) => {
+            const examInfoArgs = {
+                accommodationRequest: false,
+                militaryStatusRequest: false,
+                licenseNumber: '1234',
+                state: 'IL',
+                membership: 'No'
+            }
+            await ctrnExamInfo.setTestAnnotations(certCTRNFixtures.info(), examInfoArgs);
+
+        await certCTRNFixtures.step('Fill out Exam Information.', async () => {
+            await ctrnExamInfo.fillOutExamInfo_CTRN(examInfoArgs);
+            await ctrnExamInfo.clickNext(page);
+        });
+        });
+
+        certCTRNFixtures('Not member, yes assurance', async ({
+            ctrnTestAssurance,
+            ctrnCredVerification,
+            ctrnStatus,
+            ctrnCheckout,
             page
             }) => {
-                await certCTRN.clickYesTestAssurance();
-                await certCTRN.clickNext();
-                //move to Credential Verification
-                await certCTRN.clickNext();
-                //move to Status
-                await certCTRN.clickCheckoutButton();
-                await page.waitForLoadState('load');
-                //move to checkout
-                await certCTRN.checkoutTable.waitFor({ state: 'visible' });
-                await expect(certCTRN.checkoutTable).toContainText(certCTRN.priceNoMemYesAssur)
-                await expect.soft(certCTRN.checkoutTable).toContainText('includes Test Assurance');
-                await certCTRN.clearCheckout();
-
-                await expect(certCTRN.checkoutTable).toBeHidden();
+                //THERE SHOULD BE A WAY TO SET THE TEST ASSURANCE ARG HERE, BUT KEEP THE EXAM INFO ARGS IN PLACE IN THE ANNOTATIONS
+            await certCTRNFixtures.step('Select Yes for Test Assurance', async () => {
+                await ctrnTestAssurance.selectTestAssurance(true);
+                await ctrnTestAssurance.clickNext(page);
             });
-        certCTRNFixtures('not member, no assurance', async ({
-            page,
-            certCTRN
-            }) => {
-                await certCTRN.clickNoTestAssurance();
-                await certCTRN.clickNext();
-                //move to Credential Verification
-                await certCTRN.clickNext();
-                //move to Status
-                await certCTRN.clickCheckoutButton();
+            await certCTRNFixtures.step('Move through Credential Verification', async () => {
+                await ctrnCredVerification.clickNext(page);
+            });
+            await certCTRNFixtures.step('Move through Status page', async () => {
+                await ctrnStatus.clickCheckoutButton();
                 await page.waitForLoadState('load');
-                //move to checkout'
-                await certCTRN.checkoutTable.waitFor({ state: 'visible' });
-                await expect(certCTRN.checkoutTable).toContainText(certCTRN.priceNoMemNoAssur)
-                await certCTRN.clearCheckout();
-    
-                await expect(certCTRN.checkoutTable).toBeHidden();
+                await ctrnCheckout.checkWorkflowTitle('Checkout and Make Payment');
+            });
+            await certCTRNFixtures.step('Check displayed price', async () => {
+                await expect(ctrnCheckout.checkoutTable).toContainText(ctrnCheckout.prices.priceYesMembershipYesTestAssurance)
+                await expect.soft(ctrnCheckout.checkoutTable).toContainText('includes Test Assurance');
+            });
+            await certCTRNFixtures.step('Clear checkout', async () => {
+                await ctrnCheckout.clearCheckout();
+                await expect(ctrnCheckout.checkoutTable).toBeHidden();
+            });
+            });
+        certCTRNFixtures('Not member, no assurance', async ({
+            ctrnTestAssurance,
+            ctrnCredVerification,
+            ctrnStatus,
+            ctrnCheckout,
+            page
+            }) => {
+                //SAME THING HERE AS WITH PREVIOUS TEST - ADD testAssuranceArgs to annotations here.
+                await certCTRNFixtures.step('Select No for Test Assurance', async () => {
+                    await ctrnTestAssurance.selectTestAssurance(false);
+                    await ctrnTestAssurance.clickNext(page);
+                });
+                await certCTRNFixtures.step('Move through Credential Verification', async () => {
+                    await ctrnCredVerification.clickNext(page);
+                });
+                await certCTRNFixtures.step('Move through Status page', async () => {
+                    await ctrnStatus.clickCheckoutButton();
+                    await page.waitForLoadState('load');
+                    await ctrnCheckout.checkWorkflowTitle('Checkout and Make Payment');
+                });
+                await certCTRNFixtures.step('Check displayed price', async () => {
+                    await expect(ctrnCheckout.checkoutTable).toContainText(ctrnCheckout.prices.priceNoMembershipNoTestAssurance);
+                    await expect.soft(ctrnCheckout.checkoutTable).toContainText('includes Test Assurance');
+                });
+                await certCTRNFixtures.step('Clear checkout', async () => {
+                    await ctrnCheckout.clearCheckout();
+                    await expect(ctrnCheckout.checkoutTable).toBeHidden();
+                });
             });
   });
 
-  certCTRNFixtures.describe('yes member', () => {
-    certCTRNFixtures.beforeEach('yes member', async ({
-        certCTRN
+  certCTRNFixtures.describe('Price checks for members of other societies', () => {
+    certCTRNFixtures.beforeEach('Fill out exam info for other society member', async ({
+        ctrnExamInfo
         }) => {
-            await certCTRN.fillOutExamInfo_CTRN();
-            await certCTRN.selectMembershipASTNA('Yes');
-            await certCTRN.fillMemberNumberASTNA('1234');
-            await certCTRN.clickNoMilDiscount();
-    
-            await certCTRN.clickNext();
+            const examInfoArgs = {
+                accommodationRequest: false,
+                militaryStatusRequest: false,
+                licenseNumber: '1234',
+                state: 'IL',
+                membership: 'Yes',
+                memberNumber: '1234'
+            }
+            await ctrnExamInfo.setTestAnnotations(certCTRNFixtures.info(), examInfoArgs);
+
+            await certCTRNFixtures.step('Fill in exam info', async () => {
+                await ctrnExamInfo.fillOutExamInfo_CTRN(examInfoArgs);
+        
+                await ctrnExamInfo.clickNext(page);
+            });
         });
 
-        certCTRNFixtures('yes member, yes assurance', async ({
-            page,
-            certCTRN
+        certCTRNFixtures('Yes member, yes assurance', async ({
+            ctrnTestAssurance,
+            ctrnCredVerification,
+            ctrnStatus,
+            ctrnCheckout,
+            page
             }) => {
-                await certCTRN.clickYesTestAssurance();
-                await certCTRN.clickNext();
-                //move to Credential Verification
-                await certCTRN.clickNext();
-                //move to Status
-                await certCTRN.clickCheckoutButton();
-                //move to checkout
-                await page.waitForLoadState('load');
-                await certCTRN.checkoutTable.waitFor({ state: 'visible' });
-                await expect(certCTRN.checkoutTable).toContainText(certCTRN.priceYesMemYesAssur);
-                await expect.soft(certCTRN.checkoutTable).toContainText('includes Test Assurance');
-                await certCTRN.clearCheckout();
-    
-                await expect(certCTRN.checkoutTable).toBeHidden();
+                //SAME THING HERE AS PREVIOUS TWO
+                await certCTRNFixtures.step('Select Yes for Test Assurance', async () => {
+                    await ctrnTestAssurance.selectTestAssurance(true);
+                    await ctrnTestAssurance.clickNext(page);
+                });
+                await certCTRNFixtures.step('Move through Credential Verification', async () => {
+                    await ctrnCredVerification.clickNext(page);
+                });
+                await certCTRNFixtures.step('Move through Status page', async () => {
+                    await ctrnStatus.clickCheckoutButton();
+                    await page.waitForLoadState('load');
+                    await ctrnCheckout.checkoutTable.waitFor({ state: 'visible' });
+                });
+                await certCTRNFixtures.step('Check displayed price', async () => {
+                    await expect(ctrnCheckout.checkoutTable).toContainText(ctrnCheckout.prices.priceYesMembershipYesTestAssurance)
+                    await expect.soft(ctrnCheckout.checkoutTable).toContainText('includes Test Assurance');
+                });
+                await certCTRNFixtures.step('Clear checkout', async () => {
+                    await ctrnCheckout.clearCheckout();
+                    await expect(ctrnCheckout.checkoutTable).toBeHidden();
+                });
             });
-        certCTRNFixtures('yes member, no assurance', async ({
-            page,
-            certCTRN
+        certCTRNFixtures('Yes member, no assurance', async ({
+            ctrnTestAssurance,
+            ctrnCredVerification,
+            ctrnStatus,
+            ctrnCheckout,
+            page
             }) => {
-                await certCTRN.clickNoTestAssurance();
-                await certCTRN.clickNext();
-                //move to Credential Verification
-                await certCTRN.clickNext();
-                //move to Status
-                await certCTRN.clickCheckoutButton();
-                await page.waitForLoadState('load');
-                await certCTRN.checkoutTable.waitFor({ state: 'visible' });
-                //move to checkout
-                await expect(certCTRN.checkoutTable).toContainText(certCTRN.priceYesMemNoAssur_others);
-                await certCTRN.clearCheckout();
-    
-                await expect(certCTRN.checkoutTable).toBeHidden();
+                //AND HERE
+                await certCTRNFixtures.step('Select No for Test Assurance', async () => {
+                    await ctrnTestAssurance.selectTestAssurance(false);
+                    await ctrnTestAssurance.clickNext(page);
+                });
+                await certCTRNFixtures.step('Move through Credential Verification', async () => {
+                    await ctrnCredVerification.clickNext(page);
+                });
+                await certCTRNFixtures.step('Move through Status page', async () => {
+                    await ctrnStatus.clickCheckoutButton();
+                    await page.waitForLoadState('load');
+                    await ctrnCheckout.checkoutTable.waitFor({ state: 'visible' });
+                });
+                await certCTRNFixtures.step('Check displayed price', async () => {
+                    await expect(ctrnCheckout.checkoutTable).toContainText(ctrnCheckout.prices.priceYesMembershipNoTestAssurance_others);
+                });
+                await certCTRNFixtures.step('Clear checkout', async () => {
+                    await ctrnCheckout.clearCheckout();
+                    await expect(ctrnCheckout.checkoutTable).toBeHidden();
+                });
             });
   });
 
 
-certCTRNFixtures.describe('checkout tests', () => {
-    //THIS METHODOLOGY IS TEMPORARY...SAVES A GIVEN CHECKOUT SCREEN'S TO A JSON FILE TO RETURN TO IN OTHER TESTS
-certCTRNFixtures('grab checkout url, save to json', async ({
-    certCTRN,
+certCTRNFixtures.describe('Checkout tests', () => {
+    //On this group, the annotations are set on every test due to the absence of a beforeEach hook.
+    certCTRNFixtures('SETUP TEST: grab checkout url, save to json', async ({
+    ctrnExamInfo,
+    ctrnTestAssurance,
+    ctrnCredVerification,
+    ctrnStatus,
+    ctrnCheckout,
     page
     }) => {
-        await certCTRN.fillOutExamInfo_CTRN();
-        await certCTRN.clickNext();
-        await certCTRN.clickNoTestAssurance();
-        await certCTRN.clickNext();
-        await certCTRN.clickNext();
-        await certCTRN.clickCheckoutButton();
-        await expect(certCTRN.workflowTitle).toHaveText('Checkout and Make Payment');
-        //grab the unique url for this submittal
-        const submittalURL = page.url();
-        //pass this url to a json file so it can be used for different tests
-        fs.writeFileSync('cen-url-checkout.json', JSON.stringify(submittalURL));
-    });
-  certCTRNFixtures('add blank voucher', async ({
-    certCTRN,
+        const examInfoArgs = {
+            accommodationRequest: false,
+            militaryStatusRequest: false,
+            licenseNumber: '1234',
+            state: 'IL',
+            membership: 'No'
+        }
+        const testAssuranceArg = false
+        await ctrnExamInfo.setTestAnnotations(certCTRNFixtures.info(), examInfoArgs, testAssuranceArg);
+
+        await certCTRNFixtures.step('Fill out Exam Information', async () => {
+            await ctrnExamInfo.fillOutExamInfo_CTRN(examInfoArgs);
+            await ctrnExamInfo.clickNext(page);
+        });
+        await certCTRNFixtures.step('Continue past Test Assurance', async () => {
+            await ctrnTestAssurance.selectTestAssurance(testAssuranceArg);
+            await ctrnTestAssurance.clickNext(page);
+        });
+        await certCTRNFixtures.step('Continue past Credential Verification', async () => {
+            await ctrnCredVerification.clickNext(page);
+        });
+        await certCTRNFixtures.step('Continue past Status and save Checkout URL', async () => {
+            await ctrnStatus.clickCheckoutButton();
+            await expect(ctrnCheckout.workflowTitle).toHaveText('Checkout and Make Payment');
+            //grab the unique url for this submittal
+            const submittalURL = page.url();
+            //pass this url to a json file so it can be used for different tests
+            fs.writeFileSync('ctrn-url-checkout.json', JSON.stringify(submittalURL));
+        });
+        });
+    certCTRNFixtures('Add blank voucher', async ({
+    ctrnCheckout,
     page
-    }) => {
-        const url = JSON.parse(fs.readFileSync('cen-url-checkout.json', 'utf-8'));
-        await page.goto(url);
-        await certCTRN.clickAddVoucher();
-        await expect(certCTRN.voucherErrorPopup).toBeVisible();
-        await certCTRN.clickCloseVoucherError();
-        await expect(certCTRN.addVoucherButton).toBeVisible();
-    });
+    }) => {      
 
-    certCTRNFixtures('payment type visibility - credit', async ({
-        certCTRN,
-        page
-        }) => {
-            const url = JSON.parse(fs.readFileSync('cen-url-checkout.json', 'utf-8'));
+    const examInfoArgs = {
+        accommodationRequest: false,
+        militaryStatusRequest: false,
+        licenseNumber: '1234',
+        state: 'IL',
+        membership: 'No'
+    }
+    const testAssuranceArg = false
+    await ctrnCheckout.setTestAnnotations(certCTRNFixtures.info(), examInfoArgs, testAssuranceArg);
+
+        await certCTRNFixtures.step('Navigate to saved Checkout URL', async () => {
+            const url = JSON.parse(fs.readFileSync('ctrn-url-checkout.json', 'utf-8'));
             await page.goto(url);
-            await certCTRN.selectPaymentOption('CREDIT CARD');
-            await expect(certCTRN.creditCardOptions).toBeVisible();
-            await certCTRN.selectCreditCard('0K'); //'OK' is AE, 'OJ' is Visa/Discover/MC
-            await expect(certCTRN.submitButton).toBeVisible();
+        });
+        await certCTRNFixtures.step('Click button to submit blank voucher, expect error', async () => {
+            await ctrnCheckout.clickAddVoucher();
+            await expect(ctrnCheckout.voucherErrorPopup).toBeVisible();
+        });
+        await certCTRNFixtures.step('Close voucher error', async () => {
+            await ctrnCheckout.clickCloseVoucherError();
+            await expect(ctrnCheckout.addVoucherButton).toBeVisible();
+        });
         });
 
-    certCTRNFixtures('payment type visibility - echeck/ach', async ({
-        certCTRN,
+    certCTRNFixtures('Payment type visibility - credit', async ({
+        ctrnCheckout,
         page
         }) => {
-            const url = JSON.parse(fs.readFileSync('cen-url-checkout.json', 'utf-8'));
-            await page.goto(url);
-            await certCTRN.selectPaymentOption('ACHRT');
-            await expect(certCTRN.submitButton).toBeVisible();
+            const examInfoArgs = {
+                accommodationRequest: false,
+                militaryStatusRequest: false,
+                licenseNumber: '1234',
+                state: 'IL',
+                membership: 'No'
+            }
+            const testAssuranceArg = false
+            await ctrnCheckout.setTestAnnotations(certCTRNFixtures.info(), examInfoArgs, testAssuranceArg);
+
+            await certCTRNFixtures.step('Navigate to saved Checkout URL', async () => {
+                const url = JSON.parse(fs.readFileSync('ctrn-url-checkout.json', 'utf-8'));
+                await page.goto(url);
+            });
+            await certCTRNFixtures.step('Select Credit Card under Payment Options', async () => {
+                await ctrnCheckout.selectPaymentOption('CREDIT CARD');
+                await expect(ctrnCheckout.creditCardOptions).toBeVisible();
+            });
+            await certCTRNFixtures.step('Select Credit Card type, expect Submit button to be visible', async () => {
+                await ctrnCheckout.selectCreditCard('0K'); //'OK' is AE, 'OJ' is Visa/Discover/MC
+                await expect(ctrnCheckout.submitButton).toBeVisible();
+            });
         });
 
-    certCTRNFixtures('payment type visibility - check', async ({
-        certCTRN,
+    certCTRNFixtures('Payment type visibility - echeck/ach', async ({
+        ctrnCheckout,
         page
         }) => {
-            const url = JSON.parse(fs.readFileSync('cen-url-checkout.json', 'utf-8'));
-            await page.goto(url);
-            await page.waitForLoadState('load');
-            await certCTRN.paymentOptions.click();
-            await certCTRN.selectPaymentOption('PAY_BY_CHECK');
-            await certCTRN.paymentOptions.click();
-            await expect(certCTRN.submitCheckButton).toBeVisible();
+            const examInfoArgs = {
+                accommodationRequest: false,
+                militaryStatusRequest: false,
+                licenseNumber: '1234',
+                state: 'IL',
+                membership: 'No'
+            }
+            const testAssuranceArg = false
+            await ctrnCheckout.setTestAnnotations(certCTRNFixtures.info(), examInfoArgs, testAssuranceArg);
+
+            await certCTRNFixtures.step('Navigate to saved Checkout URL', async () => {
+                const url = JSON.parse(fs.readFileSync('ctrn-url-checkout.json', 'utf-8'));
+                await page.goto(url);
+            });
+            await certCTRNFixtures.step('Select echeck, expect Submit button to be visible', async () => {
+                await ctrnCheckout.selectPaymentOption('ACHRT');
+                await expect(ctrnCheckout.submitButton).toBeVisible();
+            });
+        });
+
+    certCTRNFixtures('Payment type visibility - check', async ({
+        ctrnCheckout,
+        page
+        }) => {
+            const examInfoArgs = {
+                accommodationRequest: false,
+                militaryStatusRequest: false,
+                licenseNumber: '1234',
+                state: 'IL',
+                membership: 'No'
+            }
+            const testAssuranceArg = false
+            await ctrnCheckout.setTestAnnotations(certCTRNFixtures.info(), examInfoArgs, testAssuranceArg);
+
+            await certCTRNFixtures.step('Navigate to saved Checkout URL', async () => {
+                const url = JSON.parse(fs.readFileSync('ctrn-url-checkout.json', 'utf-8'));
+                await page.goto(url);
+            });
+            await certCTRNFixtures.step('Select Check, expect separate Submit Check button to be visible', async () => {
+                await ctrnCheckout.selectPaymentOption('PAY_BY_CHECK');
+                await ctrnCheckout.paymentOptions.click();
+                await expect(ctrnCheckout.submitCheckButton).toBeVisible();
+            });
         });
   });
-  certCTRNFixtures.describe('payment tests', () => {
-    certCTRNFixtures.beforeEach('get to payment', async ({
-      certCTRN,
-      page
+  certCTRNFixtures.describe('Payment tests', () => {
+    certCTRNFixtures.beforeEach('Get to payment', async ({
+        ctrnExamInfo,
+        ctrnTestAssurance,
+        ctrnCredVerification,
+        ctrnStatus,
+        ctrnCheckout,
+        page
       }) => {
-          await certCTRN.fillOutExamInfo_CTRN();
-          await certCTRN.clickNext();
-          await certCTRN.clickNoTestAssurance();
-          await certCTRN.clickNext();
-          await page.waitForLoadState('load');
-          await certCTRN.clickNext();
-          await page.waitForLoadState('load');
-          await certCTRN.clickCheckoutButton();
-          await page.waitForLoadState('load');
-  
-          await certCTRN.selectPaymentOption('CREDIT CARD');
-          await expect(certCTRN.creditCardOptions).toBeVisible();
-          await certCTRN.selectCreditCard('0K'); //'OK' is AE, 'OJ' is Visa/Discover/MC
-          await expect(certCTRN.submitButton).toBeVisible();
-          await certCTRN.clickSubmitCheckout();
-      });
-      certCTRNFixtures('submit blank', async ({
-          certCTRN,
-          page
+        const examInfoArgs = {
+            accommodationRequest: false,
+            militaryStatusRequest: false,
+            licenseNumber: '1234',
+            state: 'IL',
+            membership: 'No'
+        }
+        const testAssuranceArg = false
+        await ctrnCheckout.setTestAnnotations(certCTRNFixtures.info(), examInfoArgs, testAssuranceArg);
+
+        await certCTRNFixtures.step('Fill out Exam Information', async () => {
+            await ctrnExamInfo.fillOutExamInfo_CTRN(examInfoArgs);
+            await ctrnExamInfo.clickNext(page);
+        });
+        await certCTRNFixtures.step('Continue past Test Assurance', async () => {
+            await ctrnTestAssurance.selectTestAssurance(testAssuranceArg);
+            await ctrnTestAssurance.clickNext(page);
+        });
+        await certCTRNFixtures.step('Continue past Credential Verification', async () => {
+            await ctrnCredVerification.clickNext(page);
+        });
+        await certCTRNFixtures.step('Continue past Status and save Checkout URL', async () => {
+            await ctrnStatus.clickCheckoutButton();
+            await expect(ctrnCheckout.workflowTitle).toHaveText('Checkout and Make Payment');
+        });
+        await certCTRNFixtures.step('Choose payment type, credit card type', async () => {
+            await ctrnCheckout.selectPaymentOption('CREDIT CARD');
+            await expect(ctrnCheckout.creditCardOptions).toBeVisible();
+            await ctrnCheckout.selectCreditCard('0K'); //'OK' is AE, 'OJ' is Visa/Discover/MC
+            await expect(ctrnCheckout.submitButton).toBeVisible();
+            await ctrnCheckout.clickSubmitCheckout();
+        });
+    });
+      certCTRNFixtures('Submit blank payment details', async ({
+          ctrnPayment
           }) => {
-              await certCTRN.fillNameOnCard('');
-              await certCTRN.fillCardNumber('');
-              await certCTRN.fillCVV('');
-              await certCTRN.selectMonth('Select');
-              await certCTRN.selectYear('Select');
-              await certCTRN.fillStreetAddress('');
-              await certCTRN.fillZipCode('');
-              await certCTRN.selectCountry({ value: '' });
-              await certCTRN.submitCardDetails();
+        await certCTRNFixtures.step('Set all values to blank', async () => {
+            await ctrnPayment.fillOutAndSubmitPayment({
+                cardNum: '',
+                cardName: '',
+                country: '',//if there is a problem, might be because it wants something like { value: '' }
+                zip: '',
+                address: '',
+                cvv: '',
+                month: 'Select',
+                year: 'Select'
+            });
+        });
+
+        await certCTRNFixtures.step('Expect error messages to be visible', async () => {
+            await expect(ctrnPayment.nameError).toBeVisible();
+            await expect(ctrnPayment.cardNumError).toBeVisible();
+            await expect(ctrnPayment.cvvError).toBeVisible();
+            await expect(ctrnPayment.monthError).toBeVisible();
+            await expect(ctrnPayment.yearError).toBeVisible();
+            await expect(ctrnPayment.addressError).toBeVisible();
+            await expect(ctrnPayment.zipCodeError).toBeVisible();
+            await expect(ctrnPayment.countryError).toBeVisible();
+            await expect(ctrnPayment.countryError).toBeVisible();
+            });
+        });
   
-              await expect(certCTRN.nameError).toBeVisible();
-              await expect(certCTRN.cardNumError).toBeVisible();
-              await expect(certCTRN.cvvError).toBeVisible();
-              await expect(certCTRN.monthError).toBeVisible();
-              await expect(certCTRN.yearError).toBeVisible();
-              await expect(certCTRN.addressError).toBeVisible();
-              await expect(certCTRN.zipCodeError).toBeVisible();
-              await expect(certCTRN.countryError).toBeVisible();
-              await expect(certCTRN.countryError).toBeVisible();
-              });
-        certCTRNFixtures('cancel, back to checkout', async ({
-        certCTRN,
+        certCTRNFixtures('Click cancel on payment screen, expect to return to checkout', async ({
+        ctrnPayment,
         page
         }) => {
-            await certCTRN.cancelButton.click();
-            await page.waitForLoadState('networkidle');
-            await expect(certCTRN.workflowTitle).toContainText('Checkout and Make Payment');
+            await certCTRNFixtures.step('Click cancel button, expect to go back to checkout', async () => {
+                await ctrnPayment.cancelButton.click();
+                await page.waitForLoadState('networkidle');
+                await expect(ctrnPayment.workflowTitle).toContainText('Checkout and Make Payment');
+            });
     });
-//DO NOT RUN THIS NEXT TEST UNTIL WE HAVE A WAY TO UNDO THIS PROCESS
-    certCTRNFixtures.skip('successful case', async ({
-        certCTRN,
+    certCTRNFixtures('Successful case', async ({
+        ctrnPayment,
         page,
-        homePage
+        homePage,
+        backOffice
         }) => {
-            await certCTRN.fillCardNumber('341111597242000');
-            await certCTRN.fillCVV('1154');
-            await certCTRN.selectMonth('12');
-            await certCTRN.selectYear('2025');
-            await certCTRN.submitCardDetails();
-            await page.waitForLoadState('load');
+            await certCTRNFixtures.step('Submit details', async () => {
 
-            await homePage.visit();
-            await expect(homePage.buttonCTRN).toContainText(/SCHEDULE\/MANAGE EXAM/i);
-
-    });
+                await ctrnPayment.fillOutAndSubmitPayment({
+                    cardNum: '341111597242000',
+                    cardName: 'Test Tester',
+                    cvv: '',
+                    month: 'Select',
+                    year: 'Select',
+                    address: '1234qwre',
+                    country: 'United States',
+                    zip: '60625'
+                });
+            });
+            await certCTRNFixtures.step('Go to homepage, check SSA Message reads \'SCHEDULE\/MANAGE EXAM\'', async () => {
+                await homePage.visit();
+                await expect(homePage.buttonCTRN).toContainText(/SCHEuuDULE\/MANAGE EXAM/i);
+            });
+        });
   });
+});

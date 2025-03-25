@@ -27,27 +27,26 @@ test.describe('', () => {
         await flow.goToExamInformation();
         await flow.clickNoMilDiscount();
         await flow.clickYesExamAccom();
-        await flow.clickNext();
+        await flow.clickNext(page);
         await expect(flow.workflowTitle).toContainText(/Exam Accommodation Request/i);
         //navigate to Exam Accom
         //run tests
         await flow.goToExamInformation();
         await flow.clickNoExamAccom();
-        await flow.clickNext();
+        await flow.clickNext(page);
         await expect(flow.workflowTitle).toContainText(/Test Assurance/i);
         //navigate to Test Assurance
         //run tests
         await flow.clickYesTestAssurance();
-        await flow.clickNext();
+        await flow.clickNext(page);
         await expect(flow.workflowTitle).toContainText(/Credential Verification/i);
         //navigate to Credential Verification
         //run tests
-        await flow.clickNext();
+        await flow.clickNext(page);
         await expect(flow.workflowTitle).toContainText(/Status/i);
         //navigate to Status
         //run tests
         await flow.clickCheckoutButton();
-        await page.pause();
         await expect(flow.workflowTitle).toContainText(/Checkout and Make Payment/i);
         //navigate to Checkout
         //run tests
@@ -304,6 +303,14 @@ test.describe('', () => {
             }
         }
     });
+
+    var comboBox = {};
+    comboBox._input = page.locator('');
+    comboBox._dropdown = pageXOffset.locator('');
+    comboBox.isOtherSelected = function() {
+        return comboBox._dropdown.value == other
+    }
+    const thisComboBox = new comboBox(selector1, selector2);
 
     test('dropdown alphabetized', async ({ page }) => {
 

@@ -1,10 +1,104 @@
 
 
+async completeFlowExamAccom() {
+  await this.clickNext(page);
+  await this.page.waitForLoadState('networkidle');
+
+  if (await this.mobileDropdown.isVisible()) {
+      // Mobile View: Check if the dropdown contains "Exam Accommodation"
+      const options = await this.mobileDropdown.locator('option').allTextContents();
+      expect(options).toContain('Exam Accommodation Request');
+  } else {
+      // Desktop View: Check if the left bar step is visible
+      await expect(this.examAccommodationsLeftBar).toBeVisible();
+  }
+  await expect(this.workflowTitle).toHaveText('Exam Accommodation Request');
+  const path = require('path');
+  const filePath = path.resolve(__dirname, '../600.jpg');
+
+  await this.examAccommodationsUploadInput.setInputFiles(filePath);
+  await this.page.waitForLoadState('load');
+  await expect(this.accomUploadMessage).toContainText('successfully uploaded');
+  await this.clickNext(page);
+
+  await this.clickNoTestAssurance();
+await this.clickNext(page);
+await this.page.waitForLoadState('networkidle');
+await this.clickNext(page);
+await this.page.waitForLoadState('networkidle');
+await this.clickCheckoutButton();
+await this.page.waitForLoadState('networkidle');
+
+await this.selectPaymentOption('CREDIT CARD');
+await expect(this.creditCardOptions).toBeVisible();
+await this.selectCreditCard('0K'); //'OK' is AE, 'OJ' is Visa/Discover/MC
+await expect(this.submitButton).toBeVisible();
+await this.clickSubmitCheckout();
+await this.fillCardNumber('341111597242000');
+await this.fillCVV('1154');
+await this.selectMonth('12');
+await this.selectYear('2025');
+await this.submitCardDetails();
+await this.page.waitForLoadState('networkidle');
+await expect(this.workflowTitle).toContainText('Exam Accommodation Instructions');
+await this.clickNext(page);
+}
+
+async completeFlowNoAccom() {
+await this.clickNoTestAssurance();
+await this.clickNext(page);
+await this.page.waitForLoadState('networkidle');
+await this.clickNext(page);
+await this.page.waitForLoadState('networkidle');
+await this.clickCheckoutButton();
+await this.page.waitForLoadState('networkidle');
+
+await this.selectPaymentOption('CREDIT CARD');
+await expect(this.creditCardOptions).toBeVisible();
+await this.selectCreditCard('0K'); //'OK' is AE, 'OJ' is Visa/Discover/MC
+await expect(this.submitButton).toBeVisible();
+await this.clickSubmitCheckout();
+await this.fillCardNumber('341111597242000');
+await this.fillCVV('1154');
+await this.selectMonth('12');
+await this.selectYear('2025');
+await this.submitCardDetails();
+await this.page.waitForLoadState('networkidle');
+}
+
+
+
+
+  //TO CHANGE STATUS TO RETIRED, SAME PROCESS AS DEVALIDATING CERTIFIIED STATUS, except   
+  //   await page.getByRole('link', { name: 'Certified Burn Registered' }).click();
+  // await page.locator('#selLDS_chzn_o_6').click();
+
+//CERTIFIED
+
   // await expect(page.getByRole('link', { name: 'Staff > Accommodation NMI' })).toBeVisible();
   // await expect(page.getByRole('link', { name: 'Staff > Exam Eligible', exact: true })).toBeVisible();
   // await expect(page.getByRole('link', { name: 'Staff > Exam Eligible Accommodation Rejected' })).toBeVisible();
 
-//EXAM_ELIGIBLE
+  await page.getByRole('link', { name: 'Certifications Held' }).click();
+  await page.locator('#iframe_51000000365').contentFrame().getByRole('link', { name: 'Details' }).nth(1).click();
+  await page.locator('#iframe_51000000365').contentFrame().getByRole('row', { name: 'Update Certified 02/11/2025' }).getByRole('link').click();
+  await page.goto('https://online.bcen.org/bcendev/crtwebapp.update_cert?p_cust_id=105307&p_cert_ty=CBRN&p_spec_ty=CBRN&p_level_id=CERTIFIED&p_period_serno=847122');
+  await page.getByRole('link', { name: 'Apply For a New Certificate' }).click();
+  await page.locator('#section-header').click();
+  await page.getByRole('link', { name: 'Certified Burn Registered' }).click();
+  await page.locator('#selLDS_chzn_o_2').click();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await page.getByRole('button', { name: 'Submit' }).click();
+  await page1.goto('https://online.bcen.org/bcendevssa/f?p=700:2222:3094827037447:');
+  await expect(page1.locator('htmldb\\:box_body')).toContainText('Apply for Certification');
+
+  //to revert exam failed
+  await page.getByRole('link', { name: 'EDIT FAILED- DELETE LATER' }).click();
+  page.once('dialog', dialog => {
+    console.log(`Dialog message: ${dialog.message()}`);
+    dialog.dismiss().catch(() => {});
+  });
+  await page.getByRole('link', { name: 'Delete' }).nth(1).click();
 
 ssaapexmnucall?p_app_id=STDSSA&p_page_id=998&p_cust_id=105307&p_session=16222295775835&p_itemnames=P0_SUBMITTAL_SERNO,G_WKF_FL,G_WKF_SERNO,G_WKF_TRANS_VERB,CUST_CONTEXT,P0_CONTEXT_HEADER_CD&p_itemvalues=462171,Y,629471,RNNMI,INTL_RN_NMI,SBM
 ssaapexmnucall?p_app_id=STDSSA&p_page_id=1010&p_session=7970343953706&p_itemnames=P0_SUBMITTAL_SERNO,G_WKF_FL,G_WKF_SERNO,G_WKF_TRANS_VERB,CUST_CONTEXT,P0_ATTRPAGE_CONTEXT,P0_ATTRPAGE_QUAL2,P0_MODE,P1010_FORM_CD,P0_CONTEXT_HEADER_CD&p_itemvalues=462172,Y,629472,CFRNCTRNEXAMINFORMATION,CFRN_EXAM_INFO_PEND,SBM,CFRN_CTRN_EXAM_INFORMATION,UPDATE,CFRN_CTRN_EXAM_INFORMATION,SBM
@@ -109,7 +203,6 @@ await page1.locator('#wizard-steps-dropdown').selectOption('ssaapexmnucall?p_app
 
               await console.log(submittalLinks);
 
-              await this.page.pause();
               //td:nth-child(1) a
               const submittalUrls = (await Promise.all(submittalLinks.map(async link => {
                   const relativeUrl = await link.getAttribute('href');
@@ -121,7 +214,6 @@ await page1.locator('#wizard-steps-dropdown').selectOption('ssaapexmnucall?p_app
                   try {
                       await this.page.goto(submittal);
                       console.log(`Navigated to: ${submittal}`);
-                      await this.page.pause();
                   } catch (error) {
                       console.error(`Failed to navigate to: ${submittal}`, error);
                   }
@@ -212,10 +304,10 @@ certCBRNFixtures.describe.only('checkout tests', () => {
       await homePage.removeSubmittal('CBRN')
       await certCBRN.visitCBRN();
       await certCBRN.fillOutExamInfo_CBRN();
-      await certCBRN.clickNext();
+      await certCBRN.clickNext(page);
       await certCBRN.clickNoTestAssurance();
-      await certCBRN.clickNext();
-      await certCBRN.clickNext();
+      await certCBRN.clickNext(page);
+      await certCBRN.clickNext(page);
       await certCBRN.clickCheckoutButton();
       await expect(certCBRN.workflowTitle).toHaveText('Checkout and Make Payment');
   

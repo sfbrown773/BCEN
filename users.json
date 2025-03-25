@@ -1,0 +1,139 @@
+{
+  "new application": [
+    {
+      "page": {
+        "_type": "Page",
+        "_guid": "page@1e1b5c8a154e57ae24ff48989936e738"
+      },
+      "firstName": "newapplicationFirst1741017052854",
+      "lastName": "newapplicationLast1741017052854",
+      "customerId": "7076811",
+      "state": "new application"
+    },
+    {
+      "page": {
+        "_type": "Page",
+        "_guid": "page@1e1b5c8a154e57ae24ff48989936e738"
+      },
+      "firstName": "newapplicationFirst1741017057389",
+      "lastName": "newapplicationLast1741017057389",
+      "customerId": "7076812",
+      "state": "new application"
+    },
+    {
+      "page": {
+        "_type": "Page",
+        "_guid": "page@60b48abeeca5747229910d43894047ae"
+      },
+      "firstName": "newapplicationFirst1741023377567",
+      "lastName": "newapplicationLast1741023377568",
+      "customerId": "7076840",
+      "state": "new application"
+    },
+    {
+      "page": {
+        "_type": "Page",
+        "_guid": "page@958e79aeab305d0562efacfc167d094e"
+      },
+      "firstName": "newapplicationFirst1741023827155",
+      "lastName": "newapplicationLast1741023827155",
+      "customerId": "7076848",
+      "state": "new application"
+    },
+    {
+      "page": {
+        "_type": "Page",
+        "_guid": "page@fa951d6aaab781600e3e8ee7a62af969"
+      },
+      "firstName": "newapplicationFirst1741024748708",
+      "lastName": "newapplicationLast1741024748708",
+      "customerId": "7076854",
+      "state": "new application"
+    }
+  ],
+  "retest": [
+    {
+      "page": {
+        "_type": "Page",
+        "_guid": "page@9eb7651847c2cf9cd3f8a4f8d1e98bc6"
+      },
+      "firstName": "retestFirst1741018289777",
+      "lastName": "retestLast1741018289777",
+      "customerId": "7076819",
+      "state": "retest"
+    },
+    {
+      "page": {
+        "_type": "Page",
+        "_guid": "page@e973027c878a15e6d7a4ca4b0d9306b0"
+      },
+      "firstName": "retestFirst1741018824564",
+      "lastName": "retestLast1741018824639",
+      "customerId": "7076821",
+      "state": "retest"
+    },
+    {
+      "page": {
+        "_type": "Page",
+        "_guid": "page@e973027c878a15e6d7a4ca4b0d9306b0"
+      },
+      "firstName": "retestFirst1741018954464",
+      "lastName": "retestLast1741018954464",
+      "customerId": "7076822",
+      "state": "retest"
+    },
+    {
+      "page": {
+        "_type": "Page",
+        "_guid": "page@fa951d6aaab781600e3e8ee7a62af969"
+      },
+      "firstName": "retestFirst1741024585026",
+      "lastName": "retestLast1741024585026",
+      "customerId": "7076853",
+      "state": "retest"
+    }
+  ],
+  "second attempt": [
+    {
+      "page": {
+        "_type": "Page",
+        "_guid": "page@e973027c878a15e6d7a4ca4b0d9306b0"
+      },
+      "firstName": "secondattemptFirst1741019075367",
+      "lastName": "secondattemptLast1741019075367",
+      "customerId": "7076823",
+      "state": "second attempt"
+    },
+    {
+      "page": {
+        "_type": "Page",
+        "_guid": "page@e973027c878a15e6d7a4ca4b0d9306b0"
+      },
+      "firstName": "secondattemptFirst1741019198383",
+      "lastName": "secondattemptLast1741019198383",
+      "customerId": "7076824",
+      "state": "second attempt"
+    },
+    {
+      "page": {
+        "_type": "Page",
+        "_guid": "page@e973027c878a15e6d7a4ca4b0d9306b0"
+      },
+      "firstName": "secondattemptFirst1741019304452",
+      "lastName": "secondattemptLast1741019304452",
+      "customerId": "7076825",
+      "state": "second attempt"
+    },
+    {
+      "page": {
+        "_type": "Page",
+        "_guid": "page@e973027c878a15e6d7a4ca4b0d9306b0"
+      },
+      "firstName": "secondattemptFirst1741019410750",
+      "lastName": "secondattemptLast1741019410750",
+      "customerId": "7076826",
+      "state": "second attempt"
+    }
+  ],
+  "no good": []
+}
